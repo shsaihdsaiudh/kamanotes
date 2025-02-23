@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 卡码笔记 (Kama Notes)
 
 卡码笔记是一个面向程序员的在线笔记分享和学习平台，旨在为程序员提供一个高效的知识分享和交流空间。
@@ -149,3 +150,7 @@ mvn spring-boot:run
 3. 提交更改: `git commit -m 'Add some feature'`
 4. 推送到分支: `git push origin feature/your-feature`
 5. 提交Pull Request
+=======
+# kamanotes
+【代码随想录知识星球】项目分享-卡码笔记
+>>>>>>> ee25e36dd5348d3f8655fac46b663ec497672780
