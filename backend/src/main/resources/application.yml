@@ -19,6 +19,23 @@ spring:
         max-idle: 8
         min-idle: 0
         max-wait: 2000
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: 864508127@qq.com
+    password: eqlekpslhcsgbfhf
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+    protocol: smtps
+    default-encoding: UTF-8
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
@@ -33,3 +50,10 @@ jwt:
 
 server:
   port: 8080
+
+# 自定义邮件配置
+mail:
+  verify-code:
+    expire-minutes: 15
+    resend-interval: 60
+    template-path: "templates/mail/verify-code.html"

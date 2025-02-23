@@ -4,20 +4,60 @@ import {
   ALPHANUMERIC_UNDERSCORE,
   ALPHANUMERIC_UNDERSCORE_CHINESE,
   PASSWORD_ALLOWABLE_CHARACTERS,
+  EMAIL_PATTERN,
 } from '../../../base/regex'
 import { useLogin } from '../hooks/useLogin.ts'
 import { useRegister } from '../hooks/useRegister.ts'
+import { userService } from '../service/userService.ts'
 import { useForm } from 'antd/es/form/Form'
 
 const LoginModal: React.FC = () => {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('login')
   const [loading, setLoading] = useState(false)
+  const [countdown, setCountdown] = useState(0)
 
   const { loginHandle } = useLogin()
   const { registerHandle } = useRegister()
 
   const [form] = useForm()
+
+  // 发送验证码
+  const handleSendVerifyCode = async () => {
+    try {
+      // 验证邮箱
+      await form.validateFields(['email'])
+      const email = form.getFieldValue('email')
+
+      if (!email) {
+        message.error('请输入邮箱')
+        return
+      }
+
+      setLoading(true)
+      await userService.sendVerifyCode({
+        email,
+        type: 'REGISTER',
+      })
+
+      message.success('验证码已发送')
+      // 开始倒计时
+      setCountdown(60)
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    } catch (e: any) {
+      message.error(e.message || '发送失败')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   async function onFinish(values: any) {
     try {
@@ -28,10 +68,7 @@ const LoginModal: React.FC = () => {
       } else if (value === 'register') {
         await registerHandle(values)
         message.success('注册成功')
-      } else {
-        message.error('走到这个分支表示出大问题辣！')
       }
-      setLoading(false)
       setOpen(false)
     } catch (e: any) {
       message.error(e.message)
@@ -52,44 +89,110 @@ const LoginModal: React.FC = () => {
         layout={'vertical'}
         form={form}
       >
-        <Form.Item
-          label="账号"
-          name="account"
-          rules={[
-            { required: true, message: '请输入账号' },
-            {
-              pattern: ALPHANUMERIC_UNDERSCORE,
-              message: '账号只能包含字母、数字和下划线',
-            },
-            {
-              min: 6,
-              max: 16,
-              message: '账号长度在 6 - 16 个字符',
-            },
-          ]}
-        >
-          <Input autoComplete="off" />
-        </Form.Item>
-        {value === 'register' && (
+        {value === 'login' && (
           <Form.Item
-            label="昵称"
-            name="username"
+            label="账号或邮箱"
+            name={form.getFieldValue('email') ? 'email' : 'account'}
             rules={[
-              { required: true, message: '请输入用户名' },
+              { required: true, message: '请输入账号或邮箱' },
               {
-                pattern: ALPHANUMERIC_UNDERSCORE_CHINESE,
-                message: '昵称只能包含中文、字母、数字和下划线',
-              },
-              {
-                min: 1,
-                max: 16,
-                message: '昵称长度在 1 - 16 个字符之间',
+                pattern: form.getFieldValue('email')
+                  ? EMAIL_PATTERN
+                  : ALPHANUMERIC_UNDERSCORE,
+                message: form.getFieldValue('email')
+                  ? '邮箱格式不正确'
+                  : '账号只能包含字母、数字和下划线',
               },
             ]}
           >
-            <Input autoComplete={'off'} />
+            <Input
+              autoComplete="off"
+              onChange={(e) => {
+                // 根据输入内容判断是邮箱还是账号
+                const value = e.target.value
+                if (value.includes('@')) {
+                  form.setFieldsValue({ email: value, account: undefined })
+                } else {
+                  form.setFieldsValue({ account: value, email: undefined })
+                }
+              }}
+            />
           </Form.Item>
         )}
+
+        {value === 'register' && (
+          <>
+            <Form.Item
+              label="账号"
+              name="account"
+              rules={[
+                { required: true, message: '请输入账号' },
+                {
+                  pattern: ALPHANUMERIC_UNDERSCORE,
+                  message: '账号只能包含字母、数字和下划线',
+                },
+                {
+                  min: 6,
+                  max: 16,
+                  message: '账号长度在 6 - 16 个字符',
+                },
+              ]}
+            >
+              <Input autoComplete="off" />
+            </Form.Item>
+            <Form.Item
+              label="昵称"
+              name="username"
+              rules={[
+                { required: true, message: '请输入用户名' },
+                {
+                  pattern: ALPHANUMERIC_UNDERSCORE_CHINESE,
+                  message: '昵称只能包含中文、字母、数字和下划线',
+                },
+                {
+                  min: 1,
+                  max: 16,
+                  message: '昵称长度在 1 - 16 个字符之间',
+                },
+              ]}
+            >
+              <Input autoComplete={'off'} />
+            </Form.Item>
+            <Form.Item
+              label="邮箱"
+              name="email"
+              rules={[
+                { required: true, message: '请输入邮箱' },
+                { type: 'email', message: '邮箱格式不正确' },
+              ]}
+            >
+              <Input autoComplete="off" />
+            </Form.Item>
+            <Form.Item
+              label="验证码"
+              name="verifyCode"
+              rules={[
+                { required: true, message: '请输入验证码' },
+                { len: 6, message: '验证码长度必须为6位' },
+              ]}
+            >
+              <Input
+                autoComplete="off"
+                suffix={
+                  <Button
+                    type="link"
+                    size="small"
+                    disabled={countdown > 0}
+                    onClick={handleSendVerifyCode}
+                  >
+                    {countdown > 0 ? `${countdown}s后重试` : '发送验证码'}
+                  </Button>
+                }
+              />
+            </Form.Item>
+          </>
+        )}
+
         <Form.Item
           label="密码"
           name="password"
@@ -108,6 +211,7 @@ const LoginModal: React.FC = () => {
         >
           <Input.Password autoComplete="new-password" />
         </Form.Item>
+
         <Button type="primary" htmlType="submit" block loading={loading}>
           {value === 'register' ? '注册' : '登录'}
         </Button>
@@ -141,7 +245,7 @@ const LoginModal: React.FC = () => {
             ]}
             value={value}
             onChange={(value) => setValue(value)}
-          ></Segmented>
+          />
         </div>
         <div className="mt-4 flex justify-center pb-4">
           <LoginForm />

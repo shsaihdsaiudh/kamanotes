@@ -4,6 +4,7 @@ import {
   LoginBody,
   RegisterBody,
   RegisterData,
+  SendVerifyCodeBody,
   UploadImageData,
   UserListQueryParams,
 } from '../types/serviceTypes.ts'
@@ -63,7 +64,16 @@ export const userService = {
     return httpClient.request<UploadImageData>(userApiList.uploadImage, {
       body: body,
     })
-  }
+  },
+
+  /**
+   * 发送验证码
+   */
+  sendVerifyCode: (body: SendVerifyCodeBody) => {
+    return httpClient.request<void>(userApiList.sendVerifyCode, {
+      queryParams: body,
+    })
+  },
 }
 
 /**

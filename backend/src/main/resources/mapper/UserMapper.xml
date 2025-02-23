@@ -9,8 +9,29 @@
     </select>
 
     <insert id="insert" keyProperty="userId" useGeneratedKeys="true">
-        INSERT INTO user (account, username, password)
-        VALUES (#{account}, #{username}, #{password})
+        INSERT INTO user (
+            account, 
+            username, 
+            password,
+            email,
+            email_verified,
+            gender,
+            is_banned,
+            is_admin,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{account}, 
+            #{username}, 
+            #{password},
+            #{email},
+            #{emailVerified},
+            3,
+            0,
+            0,
+            NOW(),
+            NOW()
+        )
     </insert>
 
     <select id="findById" resultType="com.kama.notes.model.entity.User">
@@ -102,5 +123,29 @@
     <select id="getTotalRegisterCount" resultType="integer">
         SELECT COUNT(*)
         FROM user
+    </select>
+
+    <select id="findByEmail" resultType="com.kama.notes.model.entity.User">
+        SELECT * FROM user WHERE email = #{email}
+    </select>
+
+    <!-- 搜索用户 -->
+    <select id="searchUsers" resultType="com.kama.notes.model.entity.User">
+        SELECT * FROM user 
+        WHERE 
+            username LIKE CONCAT(#{keyword}, '%')
+            OR account LIKE CONCAT(#{keyword}, '%')
+            OR email LIKE CONCAT(#{keyword}, '%')
+        ORDER BY 
+            CASE 
+                WHEN username = #{keyword} THEN 1
+                WHEN account = #{keyword} THEN 2
+                WHEN email = #{keyword} THEN 3
+                WHEN username LIKE CONCAT(#{keyword}, '%') THEN 4
+                WHEN account LIKE CONCAT(#{keyword}, '%') THEN 5
+                WHEN email LIKE CONCAT(#{keyword}, '%') THEN 6
+                ELSE 7
+            END
+        LIMIT #{limit} OFFSET #{offset}
     </select>
 </mapper>

@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import javax.validation.constraints.Email;
 
 /**
  * 用户注册请求DTO
@@ -37,4 +38,16 @@ public class RegisterRequest {
     @NotBlank(message = "密码不能为空")
     @Size(min = 6, max = 32, message = "密码长度必须在 6 到 32 个字符之间")
     private String password;
+
+    /**
+     * 邮箱（选填）
+     */
+    @Email(message = "邮箱格式不正确")
+    private String email;
+
+    /**
+     * 验证码（选填，邮箱填写时必填）
+     */
+    @Size(min = 6, max = 6, message = "验证码长度必须为6位")
+    private String verifyCode;
 }

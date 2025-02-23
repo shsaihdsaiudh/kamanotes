@@ -116,4 +116,24 @@ public interface UserMapper {
      * @return 总注册人数
      */
     int getTotalRegisterCount();
+
+    /**
+     * 根据邮箱查找用户
+     *
+     * @param email 用户邮箱，用于查询用户信息
+     * @return 返回用户对象，如果未找到则返回null
+     */
+    User findByEmail(@Param("email") String email);
+
+    /**
+     * 搜索用户
+     *
+     * @param keyword 关键词
+     * @param limit 限制数量
+     * @param offset 偏移量
+     * @return 用户列表
+     */
+    List<User> searchUsers(@Param("keyword") String keyword,
+                          @Param("limit") int limit,
+                          @Param("offset") int offset);
 }

@@ -14,18 +14,18 @@ public class ApiResponseUtil {
      * @return ApiResponse
      */
     public static <T> ApiResponse<T> success(String message) {
-        return new ApiResponse<>(HttpStatus.OK.value(), message, null);
+        return ApiResponse.success(null);
     }
 
     public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>(HttpStatus.OK.value(), message, data);
+        return ApiResponse.success(data);
     }
 
     /**
      * 构建参数错误的响应
      */
     public static <T> ApiResponse<T> error(String msg) {
-        return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), msg, null);
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), msg);
     }
 
     /**

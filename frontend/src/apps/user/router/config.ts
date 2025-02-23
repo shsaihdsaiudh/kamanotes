@@ -31,3 +31,8 @@ export const USER_NOTE = '/user-center/note'
  * 题目路径
  */
 export const QUESTION = '/questions'
+
+/**
+ * 消息中心
+ */
+export const MESSAGE_CENTER = '/messages'

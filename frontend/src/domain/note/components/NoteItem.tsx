@@ -21,6 +21,7 @@ interface NoteItemProps {
   showAuthor?: boolean // 是否展示作者信息
   showQuestion?: boolean // 是否展示题目信息
   showOptions?: boolean // 是否展示点赞/收藏/评论等按钮
+  onRefresh?: () => void
 }
 
 const NoteItem: React.FC<NoteItemProps> = ({
@@ -32,6 +33,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
   toggleIsModalOpen,
   handleCollectionQueryParams,
   handleSelectedNoteId,
+  onRefresh,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
@@ -69,6 +71,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
             toggleIsModalOpen={toggleIsModalOpen}
             handleCollectionQueryParams={handleCollectionQueryParams}
             handleSelectedNoteId={handleSelectedNoteId}
+            onRefresh={onRefresh}
           />
         )}
       </div>

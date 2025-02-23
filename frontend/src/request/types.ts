@@ -31,7 +31,7 @@ export interface HttpClient {
   request: <T>(
     requestTuple: RequestTuple,
     options?: Options,
-  ) => Promise<Response<T>>
+  ) => Promise<ApiResponse<T>>
 }
 
 /**
@@ -60,12 +60,12 @@ export enum Code { // 状态码
 }
 
 /**
- * 响应数据
+ * API响应数据格式
  */
-export type Response<T> = {
-  code: Code
-  msg: string
+export interface ApiResponse<T = any> {
+  code: number
+  message: string
   data: T
-  pagination?: Pagination // 分页查询时需要
-  token?: string // 登录 / 认证时会返回 token
+  pagination?: Pagination
+  token?: string
 }

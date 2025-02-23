@@ -1,7 +1,11 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Config, Logout, Permissions, User } from '@icon-park/react'
-import { USER_CENTER, USER_HOME } from '../../../apps/user/router/config.ts'
+import { Config, Logout, Permissions, User, Message } from '@icon-park/react'
+import {
+  USER_CENTER,
+  USER_HOME,
+  MESSAGE_CENTER,
+} from '../../../apps/user/router/config.ts'
 import { useUser } from '../hooks/useUser.ts'
 import { useApp } from '../../../base/hooks'
 import { useLogout } from '../hooks/useLogout.ts'
@@ -38,6 +42,14 @@ const ProfileMenu: React.FC = () => {
           fill={['#333', '#8dbaf1', '#ffffff', '#e64155']}
         />
         个人信息
+      </NavLink>
+      <NavLink className={itemCss} to={MESSAGE_CENTER}>
+        <Message
+          theme="multi-color"
+          size="18"
+          fill={['#333', '#8dbaf1', '#ffffff', '#e64155']}
+        />
+        消息中心
       </NavLink>
       {/* 只有管理员才能查看后台内容 */}
       {user.isAdmin === Admin.ADMIN && (

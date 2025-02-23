@@ -1,10 +1,16 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { NoteWithRelations } from '../types/serviceTypes.ts'
-import LikeButton from './LikeButton.tsx'
-import CollectButton from './CollectButton.tsx'
+import { Button, Drawer, message } from 'antd'
+import {
+  LikeOutlined,
+  LikeFilled,
+  StarOutlined,
+  StarFilled,
+  MessageOutlined,
+} from '@ant-design/icons'
 import { useNoteLike } from '../../noteLike'
 import { useApp } from '../../../base/hooks'
-import { message } from 'antd'
+import CommentList from '../../../apps/user/components/comment/CommentList'
 
 interface OptionsCardProps {
   note?: NoteWithRelations
@@ -12,6 +18,7 @@ interface OptionsCardProps {
   toggleIsModalOpen: () => void
   handleCollectionQueryParams: (noteId: number) => void
   handleSelectedNoteId: (noteId: number) => void
+  onRefresh?: () => void
 }
 
 const OptionsCard: React.FC<OptionsCardProps> = ({
@@ -20,11 +27,19 @@ const OptionsCard: React.FC<OptionsCardProps> = ({
   toggleIsModalOpen,
   handleCollectionQueryParams,
   handleSelectedNoteId,
+  onRefresh,
 }) => {
   const { like, unLike } = useNoteLike()
-
+  const [commentDrawerVisible, setCommentDrawerVisible] = useState(false)
+  const [localCommentCount, setLocalCommentCount] = useState(0)
   const app = useApp()
   let likeLoading = false
+
+  useEffect(() => {
+    if (note?.commentCount !== undefined) {
+      setLocalCommentCount(note.commentCount)
+    }
+  }, [note?.commentCount])
 
   /**
    * 点赞按钮点击处理函数
@@ -35,11 +50,7 @@ const OptionsCard: React.FC<OptionsCardProps> = ({
       return
     }
 
-    // 处理没有传递函数的情况
-    if (!setNoteLikeStatus) return
-
-    // 处理没有 note 或 userActions 的情况
-    if (!note || !note.userActions) return
+    if (!setNoteLikeStatus || !note || !note.userActions) return
 
     if (likeLoading) return
 
@@ -47,7 +58,7 @@ const OptionsCard: React.FC<OptionsCardProps> = ({
     setNoteLikeStatus(note.noteId, !note.userActions.isLiked)
 
     if (note.userActions.isLiked) {
-      await unLike(note!.noteId)
+      await unLike(note.noteId)
     } else {
       await like(note.noteId)
     }
@@ -63,30 +74,75 @@ const OptionsCard: React.FC<OptionsCardProps> = ({
       message.info('请先登录')
       return
     }
-    // 处理没有 note 或 userActions 为空的情况
     if (!note || !note.userActions) return
 
-    // 获取收藏列表
     toggleIsModalOpen()
     handleCollectionQueryParams(note.noteId)
     handleSelectedNoteId(note.noteId)
   }
 
+  /**
+   * 评论按钮点击处理函数
+   */
+  const handleCommentClick = () => {
+    if (!app.isLogin) {
+      message.info('请先登录')
+      return
+    }
+    setCommentDrawerVisible(true)
+  }
+
+  // 评论成功后刷新笔记数据
+  const handleCommentSuccess = () => {
+    onRefresh?.()
+  }
+
   return (
-    <div className="flex gap-4">
-      <LikeButton
-        key={`li${note?.noteId}`}
-        likeCount={note?.likeCount ?? 0}
-        currentUserLiked={note?.userActions?.isLiked ?? false}
-        clickHandle={likeButtonClickHandle}
-      ></LikeButton>
-      <CollectButton
-        key={`c${note?.noteId}`}
-        collectCount={note?.collectCount ?? 0}
-        currentUserCollected={note?.userActions?.isCollected ?? false}
-        clickHandle={collectButtonClickHandle}
-      ></CollectButton>
-    </div>
+    <>
+      <div className="flex items-center space-x-4">
+        <Button
+          type="text"
+          className="flex items-center"
+          icon={note?.userActions?.isLiked ? <LikeFilled /> : <LikeOutlined />}
+          onClick={likeButtonClickHandle}
+        >
+          {note?.likeCount || 0} 次点赞
+        </Button>
+        <Button
+          type="text"
+          className="flex items-center"
+          icon={
+            note?.userActions?.isCollected ? <StarFilled /> : <StarOutlined />
+          }
+          onClick={collectButtonClickHandle}
+        >
+          {note?.collectCount || 0} 次收藏
+        </Button>
+        <Button
+          type="text"
+          className="flex items-center"
+          icon={<MessageOutlined />}
+          onClick={handleCommentClick}
+        >
+          {localCommentCount} 条评论
+        </Button>
+      </div>
+
+      <Drawer
+        title="评论"
+        placement="right"
+        width={500}
+        onClose={() => setCommentDrawerVisible(false)}
+        open={commentDrawerVisible}
+      >
+        {note && (
+          <CommentList
+            noteId={note.noteId}
+            onCommentCountChange={handleCommentSuccess}
+          />
+        )}
+      </Drawer>
+    </>
   )
 }
 

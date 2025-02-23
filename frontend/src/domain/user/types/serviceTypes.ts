@@ -5,6 +5,8 @@ export type RegisterBody = {
   username: string
   account: string
   password: string
+  email: string
+  verifyCode: string
 }
 
 export type RegisterData = {
@@ -15,8 +17,17 @@ export type RegisterData = {
  * 登录时的请求参数和返回参数
  */
 export type LoginBody = {
-  account: string
+  account?: string
+  email?: string
   password: string
+}
+
+/**
+ * 发送验证码的请求参数
+ */
+export type SendVerifyCodeBody = {
+  email: string
+  type: 'REGISTER' | 'RESET_PASSWORD'
 }
 
 /**

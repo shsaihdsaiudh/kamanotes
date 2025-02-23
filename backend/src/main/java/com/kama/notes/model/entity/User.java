@@ -65,6 +65,11 @@ public class User {
     private String email;
 
     /**
+     * 邮箱是否验证
+     */
+    private Boolean emailVerified;
+
+    /**
      * 用户学校
      */
     private String school;

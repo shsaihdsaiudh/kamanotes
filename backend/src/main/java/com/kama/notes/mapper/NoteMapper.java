@@ -164,4 +164,44 @@ public interface NoteMapper {
      * @return 笔记总数
      */
     int getTotalNoteCount();
+
+    /**
+     * 增加笔记评论数
+     *
+     * @param noteId 笔记ID
+     */
+    void incrementCommentCount(@Param("noteId") Integer noteId);
+
+    /**
+     * 减少笔记评论数
+     *
+     * @param noteId 笔记ID
+     */
+    void decrementCommentCount(@Param("noteId") Integer noteId);
+
+    /**
+     * 搜索笔记
+     *
+     * @param keyword 关键词
+     * @param limit 限制数量
+     * @param offset 偏移量
+     * @return 笔记列表
+     */
+    List<Note> searchNotes(@Param("keyword") String keyword,
+                          @Param("limit") int limit,
+                          @Param("offset") int offset);
+
+    /**
+     * 根据标签搜索笔记
+     *
+     * @param keyword 关键词
+     * @param tag 标签
+     * @param limit 限制数量
+     * @param offset 偏移量
+     * @return 笔记列表
+     */
+    List<Note> searchNotesByTag(@Param("keyword") String keyword,
+                               @Param("tag") String tag,
+                               @Param("limit") int limit,
+                               @Param("offset") int offset);
 }

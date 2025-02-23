@@ -19,7 +19,7 @@ public class ParamExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
-        return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), "Validation Failed", errors);
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Validation Failed", errors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -28,11 +28,11 @@ public class ParamExceptionHandler {
         ex.getConstraintViolations().forEach(violation ->
                 errors.put(violation.getPropertyPath().toString(), violation.getMessage())
         );
-        return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), "Validation Failed", errors);
+        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Validation Failed", errors);
     }
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<String> handleException(Exception ex) {
-        return new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", ex.getMessage());
+        return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", ex.getMessage());
     }
 }

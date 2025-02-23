@@ -11,6 +11,7 @@ import {
   USER_HOME,
   USER_INFO,
   USER_NOTE,
+  MESSAGE_CENTER,
 } from './config.ts'
 import { NotFound } from '../../../base/components'
 import HomePage from '../pages/home/HomePage.tsx'
@@ -22,6 +23,7 @@ import QuestionSetPage from '../pages/questionSet/QuestionSetPage.tsx'
 import QuestionPage from '../pages/question/QuestionPage.tsx'
 import UserHomePage from '../pages/userHome/UserHomePage.tsx'
 import QuestionListPage from '../pages/questionList/QuestionListPage.tsx'
+import MessagePage from '../pages/MessagePage.tsx'
 
 export const UserRouteConfig = (
   <Route path={HOME} element={<UserApp />}>
@@ -37,6 +39,7 @@ export const UserRouteConfig = (
     <Route path={`${QUESTION}/:questionId`} element={<QuestionPage />} />
     <Route path={`${USER_HOME}/:userId`} element={<UserHomePage />} />
     <Route path={`${QUESTION_LIST}`} element={<QuestionListPage />} />
+    <Route path={MESSAGE_CENTER} element={<MessagePage />} />
     <Route path="/*" element={<NotFound />} />
   </Route>
 )

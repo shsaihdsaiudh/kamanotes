@@ -14,6 +14,7 @@ import com.kama.notes.model.vo.user.RegisterVO;
 import com.kama.notes.model.vo.user.LoginUserVO;
 import com.kama.notes.model.vo.user.UserVO;
 import com.kama.notes.scope.RequestScopeData;
+import com.kama.notes.service.EmailService;
 import com.kama.notes.service.FileService;
 import com.kama.notes.service.UserService;
 import com.kama.notes.utils.ApiResponseUtil;
@@ -50,22 +51,43 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RequestScopeData requestScopeData;
 
+    @Autowired
+    private EmailService emailService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ApiResponse<RegisterVO> register(RegisterRequest request) {
         // 检查账号是否已存在
-        // TODO: 可以优化
         User existingUser = userMapper.findByAccount(request.getAccount());
         if (existingUser != null) {
             return ApiResponseUtil.error("账号重复");
         }
 
+        // 如果提供了邮箱，则进行邮箱相关验证
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            // 检查邮箱是否已存在
+            existingUser = userMapper.findByEmail(request.getEmail());
+            if (existingUser != null) {
+                return ApiResponseUtil.error("邮箱已被使用");
+            }
+
+            // 如果提供了邮箱但没有提供验证码
+            if (request.getVerifyCode() == null || request.getVerifyCode().isEmpty()) {
+                return ApiResponseUtil.error("请提供邮箱验证码");
+            }
+
+            // 验证邮箱验证码
+            if (!emailService.verifyCode(request.getEmail(), request.getVerifyCode(), "REGISTER")) {
+                return ApiResponseUtil.error("验证码无效或已过期");
+            }
+        }
+
         // 创建新用户
         User user = new User();
-
         BeanUtils.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEmailVerified(request.getEmail() != null && !request.getEmail().isEmpty()); // 只有提供邮箱时才设置验证状态
 
         try {
             // 保存用户
@@ -87,12 +109,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ApiResponse<LoginUserVO> login(LoginRequest request) {
+        User user = null;
 
-        User user = userMapper.findByAccount(request.getAccount());
+        // 根据账号或邮箱查找用户
+        if (request.getAccount() != null && !request.getAccount().isEmpty()) {
+            user = userMapper.findByAccount(request.getAccount());
+        } else if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            user = userMapper.findByEmail(request.getEmail());
+        } else {
+            return ApiResponseUtil.error("请提供账号或邮箱");
+        }
 
         // 验证账号以及密码
         if (user == null) {
-            return ApiResponseUtil.error("账号不存在");
+            return ApiResponseUtil.error("用户不存在");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {

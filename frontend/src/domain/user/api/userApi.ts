@@ -9,6 +9,7 @@ export const userApiList: ApiList = {
   getUser: ['GET', '/api/users/{userId}'],
   updateMe: ['PATCH', '/api/users/me'],
   uploadImage: ['POST', '/api/upload/image'],
+  sendVerifyCode: ['GET', '/api/email/verify-code'],
 }
 
 // 管理端的 apiList
