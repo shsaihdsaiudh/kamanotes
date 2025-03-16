@@ -12,7 +12,7 @@ public class EmailServiceTest {
 
     @Test
     public void testSendVerifyCode() {
-        String email = "864508127@qq.com"; // 使用实际的QQ邮箱
+        String email = "example@qq.com"; // 使用实际的QQ邮箱
         String type = "REGISTER";
         
         String verifyCode = emailService.sendVerifyCode(email, type);
@@ -25,7 +25,7 @@ public class EmailServiceTest {
 
     @Test
     public void testSendFrequencyLimit() {
-        String email = "864508127@qq.com"; // 使用实际的QQ邮箱
+        String email = "example@qq.com"; // 使用实际的QQ邮箱
         
         // 第一次发送应该成功
         assert emailService.canSendCode(email) : "Should be able to send first code";
