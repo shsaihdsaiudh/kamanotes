@@ -5,7 +5,6 @@ import AdminApp from '../../admin/AdminApp.tsx'
 import {
   ADMIN_HOME,
   CATEGORY_MANAGE,
-  NOTIFICATION_MANAGE,
   QUESTION_LIST_MANAGE,
   QUESTION_MANAGE,
   USER_MANAGE,
@@ -25,9 +24,6 @@ const AdminQuestionList = lazy(
 )
 const AdminQuestionListDetail = lazy(
   () => import('../pages/adminQuestionListDetail/AdminQuestionListDetail.tsx'),
-)
-const AdminNotification = lazy(
-  () => import('../pages/adminNotification/AdminNotification.tsx'),
 )
 
 // 用 Suspense 包裹懒加载的组件，提供加载时的回退 UI
@@ -62,14 +58,6 @@ export const AdminRouteConfig = (
       element={
         <Suspense fallback={<div>Loading...</div>}>
           <AdminCategory />
-        </Suspense>
-      }
-    />
-    <Route
-      path={NOTIFICATION_MANAGE}
-      element={
-        <Suspense fallback={<div>Loading...</div>}>
-          <AdminNotification />
         </Suspense>
       }
     />

@@ -12,26 +12,25 @@ public class EmailServiceTest {
 
     @Test
     public void testSendVerifyCode() {
-        String email = "example@qq.com"; // 使用实际的QQ邮箱
-        String type = "REGISTER";
+        String email = "example@qq.com";
         
-        String verifyCode = emailService.sendVerifyCode(email, type);
+        String verifyCode = emailService.sendVerificationCode(email);
         System.out.println("Generated verify code: " + verifyCode);
         
         // 验证验证码
-        boolean verified = emailService.verifyCode(email, verifyCode, type);
+        boolean verified = emailService.checkVerificationCode(email, verifyCode);
         assert verified : "Verification should succeed with correct code";
     }
 
     @Test
     public void testSendFrequencyLimit() {
-        String email = "example@qq.com"; // 使用实际的QQ邮箱
+        String email = "example@qq.com";
         
         // 第一次发送应该成功
-        assert emailService.canSendCode(email) : "Should be able to send first code";
-        emailService.sendVerifyCode(email, "REGISTER");
-        
+        assert emailService.isVerificationCodeRateLimited(email) : "Should be able to send first code";
+        emailService.sendVerificationCode(email);
+
         // 第二次发送应该被限制
-        assert !emailService.canSendCode(email) : "Should not be able to send second code immediately";
+        assert !emailService.isVerificationCodeRateLimited(email) : "Should not be able to send second code immediately";
     }
-} 
+}

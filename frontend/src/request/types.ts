@@ -31,7 +31,7 @@ export interface HttpClient {
   request: <T>(
     requestTuple: RequestTuple,
     options?: Options,
-  ) => Promise<ApiResponse<T>>
+  ) => Promise<Response<T>>
 }
 
 /**
@@ -68,4 +68,12 @@ export interface ApiResponse<T = any> {
   data: T
   pagination?: Pagination
   token?: string
+}
+
+export type Response<T> = {
+  code: Code
+  msg: string
+  data: T
+  pagination?: Pagination // 分页查询时需要
+  token?: string // 登录 / 认证时会返回 token
 }

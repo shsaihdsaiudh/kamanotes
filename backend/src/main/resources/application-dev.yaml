@@ -3,9 +3,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/kamanote_tech?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
-    password: root
+    password: <PASSWORD>
 
 upload:
-  path: /Users/charon/workspace/upload # 指定上传文件的存储路径
+  path: ${user.dir}/tmp/uploads # 指定上传文件的存储路径
   url-prefix: http://localhost:8080/images  # 访问上传文件的URL前缀
-

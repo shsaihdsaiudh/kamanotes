@@ -1,4 +1,4 @@
-package com.kama.notes.task;
+package com.kama.notes.task.statistic;
 
 import com.kama.notes.mapper.StatisticMapper;
 import com.kama.notes.mapper.NoteMapper;
