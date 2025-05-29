@@ -1,5 +1,15 @@
 import React, { useState } from 'react'
-import { Avatar, Button, Form, Input, message, Modal, Segmented } from 'antd'
+import {
+  Avatar,
+  Button,
+  Col,
+  Form,
+  Input,
+  message,
+  Modal,
+  Row,
+  Segmented,
+} from 'antd'
 import {
   ALPHANUMERIC_UNDERSCORE,
   ALPHANUMERIC_UNDERSCORE_CHINESE,
@@ -10,12 +20,12 @@ import { useLogin } from '../hooks/useLogin.ts'
 import { useRegister } from '../hooks/useRegister.ts'
 import { userService } from '../service/userService.ts'
 import { useForm } from 'antd/es/form/Form'
+import CountDownButton from '@/domain/user/components/CountDownButton.tsx'
 
 const LoginModal: React.FC = () => {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('login')
   const [loading, setLoading] = useState(false)
-  const [countdown, setCountdown] = useState(0)
 
   const { loginHandle } = useLogin()
   const { registerHandle } = useRegister()
@@ -25,35 +35,19 @@ const LoginModal: React.FC = () => {
   // 发送验证码
   const handleSendVerifyCode = async () => {
     try {
-      // 验证邮箱
       await form.validateFields(['email'])
       const email = form.getFieldValue('email')
-
       if (!email) {
         message.error('请输入邮箱')
-        return
+        return false
       }
-
       setLoading(true)
-      await userService.sendVerifyCode({
-        email,
-        type: 'REGISTER',
-      })
-
+      await userService.sendVerifyCode({ email, type: 'REGISTER' })
       message.success('验证码已发送')
-      // 开始倒计时
-      setCountdown(60)
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer)
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
+      return true
     } catch (e: any) {
       message.error(e.message || '发送失败')
+      return false
     } finally {
       setLoading(false)
     }
@@ -168,28 +162,23 @@ const LoginModal: React.FC = () => {
             >
               <Input autoComplete="off" />
             </Form.Item>
-            <Form.Item
-              label="验证码"
-              name="verifyCode"
-              rules={[
-                { required: true, message: '请输入验证码' },
-                { len: 6, message: '验证码长度必须为6位' },
-              ]}
-            >
-              <Input
-                autoComplete="off"
-                suffix={
-                  <Button
-                    type="link"
-                    size="small"
-                    disabled={countdown > 0}
-                    onClick={handleSendVerifyCode}
-                  >
-                    {countdown > 0 ? `${countdown}s后重试` : '发送验证码'}
-                  </Button>
-                }
-              />
-            </Form.Item>
+            <Row gutter={8} align="middle">
+              <Col flex="auto">
+                <Form.Item
+                  label="验证码"
+                  name="verifyCode"
+                  rules={[
+                    { required: true, message: '请输入验证码' },
+                    { len: 6, message: '验证码长度必须为6位' },
+                  ]}
+                >
+                  <Input autoComplete="off" />
+                </Form.Item>
+              </Col>
+              <Col>
+                <CountDownButton handleSendVerifyCode={handleSendVerifyCode} />
+              </Col>
+            </Row>
           </>
         )}
 
@@ -211,7 +200,6 @@ const LoginModal: React.FC = () => {
         >
           <Input.Password autoComplete="new-password" />
         </Form.Item>
-
         <Button type="primary" htmlType="submit" block loading={loading}>
           {value === 'register' ? '注册' : '登录'}
         </Button>

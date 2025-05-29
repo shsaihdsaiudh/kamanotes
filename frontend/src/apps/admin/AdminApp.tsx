@@ -12,7 +12,6 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
   ADMIN_HOME,
   CATEGORY_MANAGE,
-  NOTIFICATION_MANAGE,
   QUESTION_LIST_MANAGE,
   QUESTION_MANAGE,
   USER_MANAGE,
@@ -50,11 +49,6 @@ const items: MenuProps['items'] = [
     key: CATEGORY_MANAGE,
     label: <Link to={CATEGORY_MANAGE}>分类管理</Link>,
     icon: <ShopOutlined />,
-  },
-  {
-    key: NOTIFICATION_MANAGE,
-    label: <Link to={NOTIFICATION_MANAGE}>通知管理</Link>,
-    icon: <BarChartOutlined />,
   },
   {
     key: QUESTION_MANAGE,

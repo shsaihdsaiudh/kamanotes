@@ -23,7 +23,7 @@ spring:
     host: smtp.qq.com
     port: 465
     username: your@qq.com
-    password: your
+    password: password
     properties:
       mail:
         smtp:
@@ -54,6 +54,6 @@ server:
 # 自定义邮件配置
 mail:
   verify-code:
-    expire-minutes: 15
-    resend-interval: 60
+    expire-minutes: 15  # 验证码过期时间 15 min
+    limit-expire-seconds: 60  # 发送过一次验证码后，在 60s 内不能再发送验证码，用于限流
     template-path: "templates/mail/verify-code.html"

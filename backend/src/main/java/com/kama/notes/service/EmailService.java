@@ -5,27 +5,25 @@ public interface EmailService {
      * 发送验证码邮件
      *
      * @param email 目标邮箱
-     * @param type 验证码类型（REGISTER/RESET_PASSWORD）
-     * @return 生成的验证码
+     * @return 发送的code
+     * @throws RuntimeException 如果发送邮件失败，将抛出异常
      */
-    String sendVerifyCode(String email, String type);
+    String sendVerificationCode(String email);
 
     /**
-     * 验证验证码
+     * 校验验证码是否正确
      *
-     * @param email 邮箱
-     * @param code 验证码
-     * @param type 验证码类型
-     * @return 验证是否成功
+     * @param email 邮箱地址
+     * @param code 用户输入的验证码
+     * @return true 表示校验通过
      */
-    boolean verifyCode(String email, String code, String type);
+    boolean checkVerificationCode(String email, String code);
 
     /**
-     * 检查是否可以发送验证码
-     * 用于控制发送频率
+     * 判断邮箱当前是否处于验证码限流状态
      *
-     * @param email 邮箱
-     * @return 是否可以发送
+     * @param email 邮箱地址
+     * @return true 表示当前已限流，不可发送
      */
-    boolean canSendCode(String email);
-} 
+    boolean isVerificationCodeRateLimited(String email);
+}

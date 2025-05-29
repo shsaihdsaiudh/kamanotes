@@ -31,7 +31,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Log4j2
 @Service
 public class UserServiceImpl implements UserService {
@@ -60,6 +59,7 @@ public class UserServiceImpl implements UserService {
     public ApiResponse<RegisterVO> register(RegisterRequest request) {
         // 检查账号是否已存在
         User existingUser = userMapper.findByAccount(request.getAccount());
+
         if (existingUser != null) {
             return ApiResponseUtil.error("账号重复");
         }
@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
             }
 
             // 验证邮箱验证码
-            if (!emailService.verifyCode(request.getEmail(), request.getVerifyCode(), "REGISTER")) {
+            if (!emailService.checkVerificationCode(request.getEmail(), request.getVerifyCode())) {
                 return ApiResponseUtil.error("验证码无效或已过期");
             }
         }
@@ -87,17 +87,14 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         BeanUtils.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEmailVerified(request.getEmail() != null && !request.getEmail().isEmpty()); // 只有提供邮箱时才设置验证状态
 
         try {
             // 保存用户
             userMapper.insert(user);
-
             String token = jwtUtil.generateToken(user.getUserId());
 
             RegisterVO registerVO = new RegisterVO();
             BeanUtils.copyProperties(user, registerVO);
-
             userMapper.updateLastLoginAt(user.getUserId());
 
             return ApiResponseUtil.success("注册成功", registerVO, token);

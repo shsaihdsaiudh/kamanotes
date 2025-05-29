@@ -44,22 +44,6 @@ public interface UserMapper {
     User findByAccount(@Param("account") String account);
 
     /**
-     * 根据 OpenId 查找用户
-     *
-     * @param openId 用户的 OpenId，用于查询用户信息
-     * @return 返回用户对象，如果未找到则返回 null
-     */
-    User findByOpenId(@Param("openId") String openId);
-
-    /**
-     * 根据 UnionId 查找用户
-     *
-     * @param unionId 用户的 UnionId，用于查询用户信息
-     * @return 返回用户对象，如果未找到则返回 null
-     */
-    User findByUnionId(@Param("unionId") String unionId);
-
-    /**
      * 根据查询参数查找用户列表
      *
      * @param queryParams 用户查询参数对象，封装了查询用户时的各种筛选条件
@@ -90,14 +74,6 @@ public interface UserMapper {
      * @param userId 用户ID，用于标识需要更新在线时间的用户
      */
     int updateLastLoginAt(@Param("userId") Long userId);
-
-    /**
-     * 绑定手机号
-     * @param userId 用户ID
-     * @param phone 手机号码
-     * @return 绑定结果
-     */
-    int bindPhone(@Param("userId") Long userId, @Param("phone") String phone);
 
     /**
      * 获取今日登录人数

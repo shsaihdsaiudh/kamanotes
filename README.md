@@ -4,7 +4,7 @@
 
 ## 项目特点
 
-- 📝 支持Markdown格式的笔记编写
+- 📝 支持 Markdown 格式的笔记编写
 - 🔍 强大的笔记搜索功能
 - 👥 用户互动和社交功能
 - 📊 笔记数据统计和排行
@@ -13,32 +13,20 @@
 
 ## 技术栈
 
-***后端技术****
+**后端技术**
 
 - 核心框架：Spring Boot 2.7.18
-
 - 安全框架：Spring Security
-
 - 持久层：MyBatis
-
 - 数据库：MySQL 8.0
-
 - 缓存：Redis
-
 - 消息推送：WebSocket
-
 - 搜索：MySQL 全文索引 + Jieba 分词
-
 - 文件存储：本地文件系统
-
 - 日志系统：Log4j2
-
 - 测试框架：JUnit
-
 - 模板引擎：Thymeleaf
-
 - Markdown：Flexmark
-
 - 工具库：Hutool
 
 **前端技术**
@@ -50,11 +38,10 @@
 - UI 库：Ant Design
 - 样式：TailwindCSS
 - HTTP 客户端：Axios
-- WebSocket 客户端：原生 WebSocket
+- WebSocket 客户端：原生 WebSoket
 - Markdown 渲染
 - 数据可视化
-- 代码质量：ESLint, Prettier
-- 版本控制：Husky, Lint-staged
+- 代码质量：ESLint, Prettier, Husky, Lint-staged
 
 ## 快速开始
 
@@ -88,8 +75,11 @@ mvn spring-boot:run
 ```
 
 4. 数据库配置
-- 创建数据库：*kamanote_tech*
-- 执行SQL脚本：kamanote-tech.sql
+- 创建数据库：kamanote_tech
+  - `create database kamanote_tech`
+  - `use kamanote_tech`
+- 执行 SQL 脚本：kamanote-tech.sql
+- 执行 SQL 迁移脚本：migrate.sql
 
 ## 主要功能
 

@@ -14,7 +14,6 @@ import com.kama.notes.model.dto.comment.CommentQueryParams;
 import com.kama.notes.model.dto.comment.CreateCommentRequest;
 import com.kama.notes.model.dto.comment.UpdateCommentRequest;
 import com.kama.notes.model.vo.comment.CommentVO;
-import com.kama.notes.model.vo.user.UserVO;
 import com.kama.notes.model.vo.user.UserActionVO;
 import com.kama.notes.scope.RequestScopeData;
 import com.kama.notes.service.CommentService;

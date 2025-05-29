@@ -13,24 +13,12 @@
             account, 
             username, 
             password,
-            email,
-            email_verified,
-            gender,
-            is_banned,
-            is_admin,
-            created_at,
-            updated_at
+            email
         ) VALUES (
             #{account}, 
-            #{username}, 
+            #{username},
             #{password},
-            #{email},
-            #{emailVerified},
-            3,
-            0,
-            0,
-            NOW(),
-            NOW()
+            #{email}
         )
     </insert>
 

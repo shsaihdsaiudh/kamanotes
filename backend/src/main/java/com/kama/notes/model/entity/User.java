@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
  * @Version v1.0
  */
 @Data
-@Getter
-@Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -63,11 +61,6 @@ public class User {
      * 用户邮箱
      */
     private String email;
-
-    /**
-     * 邮箱是否验证
-     */
-    private Boolean emailVerified;
 
     /**
      * 用户学校
