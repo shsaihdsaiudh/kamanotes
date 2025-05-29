@@ -176,9 +176,7 @@ const LoginModal: React.FC = () => {
                 </Form.Item>
               </Col>
               <Col>
-                <CountDownButton
-                  handleSendVerifyCode={handleSendVerifyCode}
-                ></CountDownButton>
+                <CountDownButton handleSendVerifyCode={handleSendVerifyCode} />
               </Col>
             </Row>
           </>
