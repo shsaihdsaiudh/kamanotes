@@ -1,11 +1,6 @@
 import { http } from '../http'
 import { ApiResponse } from '../types'
-import {
-  MessageResponse,
-  MessageQueryParams,
-  UnreadCountResponse,
-  Message,
-} from '@/domain/message/types'
+import { MessageQueryParams, Message } from '@/domain/message/types'
 
 /**
  * 获取消息列表

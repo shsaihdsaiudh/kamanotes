@@ -2,7 +2,7 @@
  * 评论作者信息
  */
 export interface CommentAuthor {
-  userId: number
+  userId: string
   username: string
   avatarUrl: string
 }
@@ -29,30 +29,14 @@ export interface Comment {
   replies?: Comment[]
 }
 
-/**
- * 创建评论请求参数
- */
-export interface CreateCommentParams {
+export interface CommentQueryParams {
+  noteId: number
+  page?: number
+  pageSize?: number
+}
+
+export interface CreateCommentRequest {
   noteId: number
   parentId?: number
   content: string
-}
-
-/**
- * 评论查询参数
- */
-export interface CommentQueryParams {
-  noteId: number
-  parentId?: number
-  page: number
-  pageSize: number
-}
-
-/**
- * 评论API响应
- */
-export interface CommentResponse {
-  code: number
-  message: string
-  data: Comment[]
 }

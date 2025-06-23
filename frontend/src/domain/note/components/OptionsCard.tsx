@@ -9,8 +9,8 @@ import {
   MessageOutlined,
 } from '@ant-design/icons'
 import { useNoteLike } from '../../noteLike'
-import { useApp } from '../../../base/hooks'
-import CommentList from '../../../apps/user/components/comment/CommentList'
+import { useApp } from '@/base/hooks'
+import CommentList from '@/domain/comment/components/CommentList'
 
 interface OptionsCardProps {
   note?: NoteWithRelations
@@ -84,7 +84,7 @@ const OptionsCard: React.FC<OptionsCardProps> = ({
   /**
    * 评论按钮点击处理函数
    */
-  const handleCommentClick = () => {
+  const handleCommentClick = async () => {
     if (!app.isLogin) {
       message.info('请先登录')
       return

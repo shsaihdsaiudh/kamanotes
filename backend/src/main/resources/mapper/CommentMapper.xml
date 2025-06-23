@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kama.notes.mapper.CommentMapper">
+
+    <sql id="selectFields">
+        comment_id, note_id, author_id, parent_id, content, like_count, reply_count, created_at, updated_at
+    </sql>
+
     <!-- 评论结果映射 -->
     <resultMap id="commentMap" type="com.kama.notes.model.entity.Comment">
         <id property="commentId" column="comment_id"/>
@@ -16,13 +21,10 @@
 
     <!-- 插入评论 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="commentId">
-        INSERT INTO comment (
-            note_id, author_id, parent_id, content,
-            like_count, reply_count, created_at, updated_at
-        ) VALUES (
-            #{noteId}, #{authorId}, #{parentId}, #{content},
-            #{likeCount}, #{replyCount}, #{createdAt}, #{updatedAt}
-        )
+        INSERT INTO comment (note_id, author_id, parent_id, content,
+                             like_count, reply_count, created_at, updated_at)
+        VALUES (#{noteId}, #{authorId}, #{parentId}, #{content},
+                #{likeCount}, #{replyCount}, #{createdAt}, #{updatedAt})
     </insert>
 
     <!-- 更新评论 -->
@@ -47,12 +49,17 @@
         SELECT * FROM comment WHERE comment_id = #{commentId}
     </select>
 
+    <select id="findByNoteId" resultMap="commentMap">
+        SELECT
+        <include refid="selectFields"/>
+        FROM comment WHERE note_id = #{noteId}
+    </select>
+
     <!-- 查询评论列表 -->
     <select id="findByQueryParam" resultMap="commentMap">
         SELECT * FROM comment
         <where>
             <if test="params.noteId != null">AND note_id = #{params.noteId}</if>
-            <if test="params.parentId != null">AND parent_id = #{params.parentId}</if>
             <if test="params.authorId != null">AND author_id = #{params.authorId}</if>
         </where>
         ORDER BY created_at DESC

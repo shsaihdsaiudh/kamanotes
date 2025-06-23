@@ -3,17 +3,17 @@ import { Avatar, Button, List } from 'antd'
 import { LikeOutlined, LikeFilled } from '@ant-design/icons'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { Comment } from '../../../../domain/comment/types'
+import { Comment } from '@/domain/comment/types.ts'
 
 interface CommentItemProps {
   comment: Comment
-  onCommentSuccess: () => void
-  onLike: (isLiked: boolean) => void
+  onReply: () => void
+  onLike: () => void
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({
   comment,
-  onCommentSuccess,
+  onReply,
   onLike,
 }) => {
   return (
@@ -26,11 +26,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
           icon={
             comment.userActions?.isLiked ? <LikeFilled /> : <LikeOutlined />
           }
-          onClick={() => onLike(comment.userActions?.isLiked || false)}
+          onClick={onLike}
         >
           {comment.likeCount || 0} 赞
         </Button>,
-        <Button key="reply" type="text" onClick={onCommentSuccess}>
+        <Button key="reply" type="text" onClick={onReply}>
           回复
         </Button>,
       ]}

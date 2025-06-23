@@ -10,7 +10,7 @@ export interface MessageSender {
 /**
  * 消息类型
  */
-export type MessageType = 'COMMENT' | 'LIKE'
+export type MessageType = 'COMMENT' | 'LIKE' | 'SYSTEM'
 
 /**
  * 消息数据

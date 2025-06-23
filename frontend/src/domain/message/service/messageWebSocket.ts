@@ -14,6 +14,7 @@ class MessageWebSocketService {
 
   private connect() {
     const token = getToken()
+    console.log(token)
     if (!token) {
       console.warn('未登录，无法建立WebSocket连接')
       return

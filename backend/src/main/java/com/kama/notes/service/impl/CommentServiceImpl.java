@@ -7,7 +7,9 @@ import com.kama.notes.mapper.CommentMapper;
 import com.kama.notes.mapper.NoteMapper;
 import com.kama.notes.mapper.UserMapper;
 import com.kama.notes.mapper.CommentLikeMapper;
+import com.kama.notes.model.base.Pagination;
 import com.kama.notes.model.entity.Comment;
+import com.kama.notes.model.entity.CommentLike;
 import com.kama.notes.model.entity.Note;
 import com.kama.notes.model.entity.User;
 import com.kama.notes.model.dto.comment.CommentQueryParams;
@@ -18,14 +20,17 @@ import com.kama.notes.model.vo.user.UserActionVO;
 import com.kama.notes.scope.RequestScopeData;
 import com.kama.notes.service.CommentService;
 import com.kama.notes.service.MessageService;
+import com.kama.notes.utils.ApiResponseUtil;
+import com.kama.notes.utils.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,17 +52,17 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public ApiResponse<Integer> createComment(CreateCommentRequest request) {
         log.info("开始创建评论: request={}", request);
-        
+
         try {
             Long userId = requestScopeData.getUserId();
-            
+
             // 获取笔记信息
             Note note = noteMapper.findById(request.getNoteId());
             if (note == null) {
                 log.error("笔记不存在: noteId={}", request.getNoteId());
                 return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "笔记不存在");
             }
-            
+
             // 创建评论
             Comment comment = new Comment();
             comment.setNoteId(request.getNoteId());
@@ -68,28 +73,28 @@ public class CommentServiceImpl implements CommentService {
             comment.setReplyCount(0);
             comment.setCreatedAt(LocalDateTime.now());
             comment.setUpdatedAt(LocalDateTime.now());
-            
+
             commentMapper.insert(comment);
             log.info("评论创建结果: commentId={}", comment.getCommentId());
-            
+
             // 增加笔记评论数
             noteMapper.incrementCommentCount(request.getNoteId());
-            
+
             // 如果是回复评论，增加父评论的回复数
             if (request.getParentId() != null) {
                 commentMapper.incrementReplyCount(request.getParentId());
             }
-            
+
             // 创建消息通知
             ApiResponse<Integer> messageResponse = messageService.createMessage(
-                note.getAuthorId(),  // 接收者是笔记作者
-                userId,              // 发送者是评论作者
-                "COMMENT",           // 消息类型是评论
-                comment.getCommentId(), // 目标ID是评论ID
-                "评论了你的笔记"      // 消息内容
+                    note.getAuthorId(),  // 接收者是笔记作者
+                    userId,              // 发送者是评论作者
+                    "COMMENT",           // 消息类型是评论
+                    comment.getCommentId(), // 目标ID是评论ID
+                    "评论了你的笔记"      // 消息内容
             );
             log.info("消息通知已创建: {}", messageResponse);
-            
+
             return ApiResponse.success(comment.getCommentId());
         } catch (Exception e) {
             log.error("创建评论失败", e);
@@ -156,48 +161,117 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ApiResponse<List<CommentVO>> getComments(CommentQueryParams params) {
         try {
-            List<Comment> comments = commentMapper.findByQueryParam(params, params.getPageSize(), (params.getPage() - 1) * params.getPageSize());
-            if (comments == null || comments.isEmpty()) {
-                return ApiResponse.success(List.of());
+            // 拉取整棵评论树（一个 note 通常也就几百条，足够了）
+            List<Comment> comments = commentMapper.findByNoteId(params.getNoteId());
+
+            System.out.println( comments);
+
+            if (CollectionUtils.isEmpty(comments)) {
+                return ApiResponse.success(Collections.emptyList());
             }
 
-            List<CommentVO> commentVOs = comments.stream()
-                .map(comment -> {
-                    CommentVO vo = new CommentVO();
-                    vo.setCommentId(comment.getCommentId());
-                    vo.setContent(comment.getContent());
-                    vo.setLikeCount(comment.getLikeCount());
-                    vo.setReplyCount(comment.getReplyCount());
-                    vo.setCreatedAt(comment.getCreatedAt());
-                    vo.setUpdatedAt(comment.getUpdatedAt());
-                    
-                    // 设置作者信息
-                    User author = userMapper.findById(comment.getAuthorId());
-                    if (author != null) {
-                        CommentVO.SimpleAuthorVO authorVO = new CommentVO.SimpleAuthorVO();
-                        authorVO.setUserId(author.getUserId());
-                        authorVO.setUsername(author.getUsername());
-                        authorVO.setAvatarUrl(author.getAvatarUrl());
-                        vo.setAuthor(authorVO);
-                    }
-                    
-                    // 设置用户操作状态
-                    Long currentUserId = requestScopeData.getUserId();
-                    if (currentUserId != null) {
-                        UserActionVO userActions = new UserActionVO();
-                        userActions.setIsLiked(commentLikeMapper.checkIsLiked(currentUserId, comment.getCommentId()));
-                        vo.setUserActions(userActions);
-                    }
-                    
-                    return vo;
-                })
-                .collect(Collectors.toList());
+            /* ---------- 数据准备：分组 + 批量查询 ---------- */
 
-            return ApiResponse.success(commentVOs);
+            // 2.1 一级评论列表
+            List<Comment> firstLevel = comments.stream()
+                    .filter(c -> c.getParentId() == null || c.getParentId() == 0)
+                    .sorted(Comparator.comparing(Comment::getCreatedAt))      // 按时间升序
+                    .toList();
+
+            int from = PaginationUtils.calculateOffset(params.getPage(), params.getPageSize());
+            if (from >= firstLevel.size()) {
+                return ApiResponse.success(Collections.emptyList());          // 页码溢出，直接返回空
+            }
+
+            int to = Math.min(from + params.getPageSize(), firstLevel.size());
+            List<Comment> pagedFirst = firstLevel.subList(from, to);
+
+            // 2.3 parentId  => children
+            Map<Integer, List<Comment>> repliesMap = comments.stream()
+                    .filter(c -> c.getParentId() != null)
+                    .collect(Collectors.groupingBy(Comment::getParentId));
+
+            // 2.4 批量获取作者信息
+            List<Long> authorIds = comments.stream()
+                    .map(Comment::getAuthorId)
+                    .collect(Collectors.toList());
+
+            Map<Long, User> authorMap = userMapper.findByIdBatch(authorIds)
+                    .stream()
+                    .collect(Collectors.toMap(User::getUserId, u -> u));
+
+            // 2.5 当前用户一次性查点赞
+            Long currentUserId = requestScopeData.getUserId();
+
+            Set<Integer> likedSet;
+            if (currentUserId != null) {
+                List<Integer> allCommentIds = comments.stream()
+                        .map(Comment::getCommentId)
+                        .toList();
+                likedSet = new HashSet<>(commentLikeMapper.findUserLikedCommentIds(currentUserId, allCommentIds));
+            } else {
+                likedSet = Collections.emptySet();
+            }
+
+            /* ---------- 递归装配 VO ---------- */
+            List<CommentVO> result = pagedFirst.stream()
+                    .map(c -> toVO(c, repliesMap, authorMap, likedSet))
+                    .toList();
+
+            Pagination pagination = new Pagination(params.getPage(), params.getPageSize(), firstLevel.size());
+
+            return ApiResponseUtil.success("", result, pagination);
         } catch (Exception e) {
             log.error("获取评论列表失败", e);
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "获取评论列表失败");
         }
+    }
+
+    /** 把 Comment 递归转换成 CommentVO */
+    private CommentVO toVO(Comment c,
+                           Map<Integer, List<Comment>> repliesMap,
+                           Map<Long, User> authorMap,
+                           Set<Integer> likedSet) {
+        CommentVO vo = new CommentVO();
+        vo.setCommentId(c.getCommentId());
+        vo.setNoteId(c.getNoteId());
+        vo.setContent(c.getContent());
+        vo.setLikeCount(c.getLikeCount());
+        vo.setReplyCount(c.getReplyCount());
+        vo.setCreatedAt(c.getCreatedAt());
+        vo.setUpdatedAt(c.getUpdatedAt());
+
+        // 作者信息
+        User author = authorMap.get(c.getAuthorId());
+        if (author != null) {
+            CommentVO.SimpleAuthorVO a = new CommentVO.SimpleAuthorVO();
+            a.setUserId(author.getUserId());
+            a.setUsername(author.getUsername());
+            a.setAvatarUrl(author.getAvatarUrl());
+            vo.setAuthor(a);
+        }
+
+        // 当前用户动作
+        if (!likedSet.isEmpty()) {
+            UserActionVO actions = new UserActionVO();
+            actions.setIsLiked(likedSet.contains(c.getCommentId()));
+            vo.setUserActions(actions);
+        } else {
+            vo.setUserActions(new UserActionVO());
+            vo.getUserActions().setIsLiked(false);
+        }
+
+        // 递归子评论
+        List<Comment> children = repliesMap.get(c.getCommentId());
+        if (children != null && !children.isEmpty()) {
+            List<CommentVO> childVOs = children.stream()
+                    .map(child -> toVO(child, repliesMap, authorMap, likedSet))
+                    .toList();
+            vo.setReplies(childVOs);
+        } else {
+            vo.setReplies(Collections.emptyList());
+        }
+        return vo;
     }
 
     @Override
@@ -206,8 +280,11 @@ public class CommentServiceImpl implements CommentService {
     public ApiResponse<EmptyVO> likeComment(Integer commentId) {
         Long userId = requestScopeData.getUserId();
 
+        System.out.println(userId  + " liked " + commentId);
+
         // 查询评论
         Comment comment = commentMapper.findById(commentId);
+
         if (comment == null) {
             return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "评论不存在");
         }
@@ -215,16 +292,12 @@ public class CommentServiceImpl implements CommentService {
         try {
             // 增加评论点赞数
             commentMapper.incrementLikeCount(commentId);
-            
-            // 发送点赞消息通知
-            messageService.createMessage(
-                comment.getAuthorId(),  // 接收者是评论作者
-                userId,                 // 发送者是点赞用户
-                "LIKE",                 // 消息类型是点赞
-                commentId,              // 目标ID是评论ID
-                "点赞了你的评论"        // 消息内容
-            );
-            
+            CommentLike commentLike = new CommentLike();
+
+            commentLike.setCommentId(commentId);
+            commentLike.setUserId(userId);
+
+            commentLikeMapper.insert(commentLike);
             return ApiResponse.success(new EmptyVO());
         } catch (Exception e) {
             log.error("点赞评论失败", e);
@@ -247,10 +320,11 @@ public class CommentServiceImpl implements CommentService {
         try {
             // 减少评论点赞数
             commentMapper.decrementLikeCount(commentId);
+            commentLikeMapper.delete(commentId, userId);
             return ApiResponse.success(new EmptyVO());
         } catch (Exception e) {
             log.error("取消点赞评论失败", e);
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "取消点赞评论失败");
         }
     }
-} 
+}

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Avatar, Button, List, message, Tag } from 'antd'
-import { formatDistanceToNow } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
+import { Button, List, message, Tag } from 'antd'
 import { getMessages, markAsRead, markAllAsRead } from '@/request/api/message'
 import { Message } from '@/domain/message/types'
 import { messageWebSocket } from '@/domain/message/service/messageWebSocket'
@@ -74,8 +72,8 @@ const MessageList: React.FC<MessageListProps> = ({ onUnreadCountChange }) => {
         )
         onUnreadCountChange?.()
       }
-    } catch (err) {
-      message.error('标记已读失败')
+    } catch (err: unknown) {
+      if (err instanceof Error) message.error(err.message)
     }
   }
 
@@ -92,8 +90,8 @@ const MessageList: React.FC<MessageListProps> = ({ onUnreadCountChange }) => {
         onUnreadCountChange?.()
         message.success('已全部标记为已读')
       }
-    } catch (err) {
-      message.error('标记全部已读失败')
+    } catch (err: unknown) {
+      if (err instanceof Error) message.error(err.message)
     }
   }
 

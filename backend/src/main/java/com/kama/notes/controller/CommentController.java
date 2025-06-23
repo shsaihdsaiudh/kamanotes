@@ -26,6 +26,18 @@ public class CommentController {
     private CommentService commentService;
 
     /**
+     * 获取评论列表
+     *
+     * @param params 查询参数
+     * @return 评论列表
+     */
+    @GetMapping("/comments")
+    public ApiResponse<List<CommentVO>> getComments(
+            @Valid CommentQueryParams params) {
+        return commentService.getComments(params);
+    }
+
+    /**
      * 创建评论
      *
      * @param request 创建评论请求
@@ -43,7 +55,7 @@ public class CommentController {
      * 更新评论
      *
      * @param commentId 评论ID
-     * @param request 更新评论请求
+     * @param request   更新评论请求
      * @return 空响应
      */
     @PatchMapping("/comments/{commentId}")
@@ -65,18 +77,6 @@ public class CommentController {
     public ApiResponse<EmptyVO> deleteComment(
             @PathVariable("commentId") Integer commentId) {
         return commentService.deleteComment(commentId);
-    }
-
-    /**
-     * 获取评论列表
-     *
-     * @param params 查询参数
-     * @return 评论列表
-     */
-    @GetMapping("/comments")
-    public ApiResponse<List<CommentVO>> getComments(
-            @Valid CommentQueryParams params) {
-        return commentService.getComments(params);
     }
 
     /**

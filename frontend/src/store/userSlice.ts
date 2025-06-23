@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { UserState } from '../domain/user'
-import { Gender, Admin } from '../domain/user'
+import type { UserState } from '@/domain/user'
+import { Gender, Admin } from '@/domain/user'
 
 const initialUserState: UserState = {
   userId: '',

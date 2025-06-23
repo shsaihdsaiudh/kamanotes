@@ -41,6 +41,12 @@ public interface CommentMapper {
      */
     Comment findById(Integer commentId);
 
+
+    /**
+     * 根据笔记 ID 查询评论列表
+     */
+    List<Comment> findByNoteId(Integer noteId);
+
     /**
      * 查询评论列表
      *

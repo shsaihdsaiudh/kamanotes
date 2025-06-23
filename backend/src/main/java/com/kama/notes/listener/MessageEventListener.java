@@ -39,7 +39,7 @@ public class MessageEventListener {
                 event.getMessage().getContent()
             );
 
-            // 2. 如果用户在线，通过WebSocket推送消息
+            // 2. 如果用户在线，通过 WebSocket 推送消息
             if (messageWebSocketHandler.isUserOnline(event.getReceiverId())) {
                 messageWebSocketHandler.sendMessageToUser(event.getReceiverId(), event.getMessage());
             }
@@ -49,4 +49,4 @@ public class MessageEventListener {
             // 这里可以添加重试逻辑或者将失败的消息记录到特定的队列中
         }
     }
-} 
+}

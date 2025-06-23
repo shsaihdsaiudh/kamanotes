@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(messageWebSocketHandler(), "/ws/message")
-                .setAllowedOrigins("*");  // 生产环境需要限制允许的域名
+                .setAllowedOrigins("*");
     }
 
     @Bean
@@ -47,4 +47,4 @@ public class WebSocketConfig implements WebSocketConfigurer {
         container.setMaxSessionIdleTimeout(60000L);
         return container;
     }
-} 
+}
