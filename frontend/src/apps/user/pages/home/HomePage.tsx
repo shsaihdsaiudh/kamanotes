@@ -43,7 +43,7 @@ const HomePage: React.FC = () => {
               setQueryParams={setSearchParamsHandle}
               setNoteLikeStatusHandle={setNoteLikeStatusHandle}
               setNoteCollectStatusHandle={setNoteCollectStatusHandle}
-            ></NoteList>
+            />
           </Skeleton>
         </Panel>
       </div>

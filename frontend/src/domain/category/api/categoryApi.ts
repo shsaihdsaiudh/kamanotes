@@ -1,4 +1,4 @@
-import { ApiList } from '../../../request'
+import { ApiList } from '@/request'
 
 export const adminCategoryApiList: ApiList = {
   categories: ['GET', '/api/admin/categories'],

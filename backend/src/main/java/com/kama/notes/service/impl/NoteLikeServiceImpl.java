@@ -5,8 +5,11 @@ import com.kama.notes.mapper.NoteLikeMapper;
 import com.kama.notes.mapper.NoteMapper;
 import com.kama.notes.model.base.ApiResponse;
 import com.kama.notes.model.base.EmptyVO;
+import com.kama.notes.model.dto.message.MessageDTO;
 import com.kama.notes.model.entity.Note;
 import com.kama.notes.model.entity.NoteLike;
+import com.kama.notes.model.enums.message.MessageTargetType;
+import com.kama.notes.model.enums.message.MessageType;
 import com.kama.notes.scope.RequestScopeData;
 import com.kama.notes.service.MessageService;
 import com.kama.notes.service.NoteLikeService;
@@ -52,14 +55,18 @@ public class NoteLikeServiceImpl implements NoteLikeService {
             // 增加笔记点赞数
             noteMapper.likeNote(noteId);
 
-            // 发送点赞通知
-            messageService.createMessage(
-                note.getAuthorId(),
-                userId,
-                "LIKE",
-                noteId,
-                "点赞了你的笔记"
-            );
+            MessageDTO messageDTO = new MessageDTO();
+            messageDTO.setType(MessageType.LIKE);
+            messageDTO.setReceiverId(note.getAuthorId());
+            messageDTO.setSenderId(userId);
+
+            messageDTO.setTargetType(MessageTargetType.NOTE);
+            messageDTO.setTargetId(noteId);
+            messageDTO.setIsRead(false);
+
+            System.out.println(messageDTO);
+
+            messageService.createMessage(messageDTO);
 
             return ApiResponseUtil.success("点赞成功");
         } catch (Exception e) {

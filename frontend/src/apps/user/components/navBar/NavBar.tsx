@@ -2,13 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { Menu } from 'antd'
 import { NavLink, useLocation } from 'react-router-dom'
 import { MenuProps } from 'antd'
-import { HOME_PAGE, QUESTION_LIST, QUESTION_SET } from '../../router/config.ts'
+import {
+  HOME_PAGE,
+  MESSAGE_CENTER,
+  QUESTION_LIST,
+  QUESTION_SET,
+} from '../../router/config.ts'
 import Logo from '../logo/Logo.tsx'
-import { useApp } from '../../../../base/hooks'
+import { useApp } from '@/base/hooks'
 import { LoginModal, UserAvatarMenu } from '../../../../domain/user'
 import SearchInput from '../searchInput/SearchInput.tsx'
 import { ColumnDivider } from '../../../../base/components'
 import DownloadNoteItem from '../../../../domain/note/components/DownloadNoteItem.tsx'
+import { BellOutlined } from '@ant-design/icons'
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -64,6 +70,9 @@ const NavBar: React.FC = () => {
       </div>
       <div className="flex items-center gap-8">
         <SearchInput />
+        <NavLink to={MESSAGE_CENTER}>
+          <BellOutlined className="hover:text-gray-600" />
+        </NavLink>
         {app.isLogin ? <UserAvatarMenu /> : <LoginModal />}
       </div>
     </nav>

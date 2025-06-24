@@ -16,17 +16,17 @@ public class MessageVO {
     /**
      * 发送者信息
      */
-    private SimpleUserVO sender;
+    private Sender sender;
 
     /**
      * 消息类型
      */
-    private String type;
+    private Integer type;
 
     /**
      * 目标ID
      */
-    private Integer targetId;
+    private Target target;
 
     /**
      * 消息内容
@@ -47,9 +47,22 @@ public class MessageVO {
      * 简单用户信息
      */
     @Data
-    public static class SimpleUserVO {
+    public static class Sender {
         private Long userId;
         private String username;
         private String avatarUrl;
+    }
+
+    @Data
+    public static class Target {
+        private Integer targetId;
+        private Integer targetType;
+        private QuestionSummary questionSummary;
+    }
+
+    @Data
+    public static class QuestionSummary {
+        private Integer questionId;
+        private String title;
     }
 } 

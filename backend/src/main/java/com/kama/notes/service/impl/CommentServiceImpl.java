@@ -8,6 +8,7 @@ import com.kama.notes.mapper.NoteMapper;
 import com.kama.notes.mapper.UserMapper;
 import com.kama.notes.mapper.CommentLikeMapper;
 import com.kama.notes.model.base.Pagination;
+import com.kama.notes.model.dto.message.MessageDTO;
 import com.kama.notes.model.entity.Comment;
 import com.kama.notes.model.entity.CommentLike;
 import com.kama.notes.model.entity.Note;
@@ -15,6 +16,8 @@ import com.kama.notes.model.entity.User;
 import com.kama.notes.model.dto.comment.CommentQueryParams;
 import com.kama.notes.model.dto.comment.CreateCommentRequest;
 import com.kama.notes.model.dto.comment.UpdateCommentRequest;
+import com.kama.notes.model.enums.message.MessageTargetType;
+import com.kama.notes.model.enums.message.MessageType;
 import com.kama.notes.model.vo.comment.CommentVO;
 import com.kama.notes.model.vo.user.UserActionVO;
 import com.kama.notes.scope.RequestScopeData;
@@ -85,15 +88,18 @@ public class CommentServiceImpl implements CommentService {
                 commentMapper.incrementReplyCount(request.getParentId());
             }
 
-            // 创建消息通知
-            ApiResponse<Integer> messageResponse = messageService.createMessage(
-                    note.getAuthorId(),  // 接收者是笔记作者
-                    userId,              // 发送者是评论作者
-                    "COMMENT",           // 消息类型是评论
-                    comment.getCommentId(), // 目标ID是评论ID
-                    "评论了你的笔记"      // 消息内容
-            );
-            log.info("消息通知已创建: {}", messageResponse);
+            // 发送评论通知
+            MessageDTO messageDTO = new MessageDTO();
+
+            messageDTO.setType(MessageType.COMMENT);
+            messageDTO.setTargetType(MessageTargetType.NOTE);
+            messageDTO.setTargetId(request.getNoteId());
+            messageDTO.setReceiverId(note.getAuthorId());
+            messageDTO.setSenderId(userId);
+            messageDTO.setContent(request.getContent());
+            messageDTO.setIsRead(false);
+
+            messageService.createMessage(messageDTO);
 
             return ApiResponse.success(comment.getCommentId());
         } catch (Exception e) {
@@ -164,7 +170,7 @@ public class CommentServiceImpl implements CommentService {
             // 拉取整棵评论树（一个 note 通常也就几百条，足够了）
             List<Comment> comments = commentMapper.findByNoteId(params.getNoteId());
 
-            System.out.println( comments);
+            System.out.println(comments);
 
             if (CollectionUtils.isEmpty(comments)) {
                 return ApiResponse.success(Collections.emptyList());
@@ -227,7 +233,9 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    /** 把 Comment 递归转换成 CommentVO */
+    /**
+     * 把 Comment 递归转换成 CommentVO
+     */
     private CommentVO toVO(Comment c,
                            Map<Integer, List<Comment>> repliesMap,
                            Map<Long, User> authorMap,
@@ -280,7 +288,7 @@ public class CommentServiceImpl implements CommentService {
     public ApiResponse<EmptyVO> likeComment(Integer commentId) {
         Long userId = requestScopeData.getUserId();
 
-        System.out.println(userId  + " liked " + commentId);
+        System.out.println(userId + " liked " + commentId);
 
         // 查询评论
         Comment comment = commentMapper.findById(commentId);
@@ -298,6 +306,17 @@ public class CommentServiceImpl implements CommentService {
             commentLike.setUserId(userId);
 
             commentLikeMapper.insert(commentLike);
+
+            MessageDTO messageDTO = new MessageDTO();
+
+            messageDTO.setType(MessageType.LIKE);
+            messageDTO.setReceiverId(comment.getAuthorId());
+            messageDTO.setSenderId(userId);
+            messageDTO.setTargetType(MessageTargetType.NOTE);
+            messageDTO.setTargetId(comment.getNoteId());
+            messageDTO.setIsRead(false);
+
+            messageService.createMessage(messageDTO);
             return ApiResponse.success(new EmptyVO());
         } catch (Exception e) {
             log.error("点赞评论失败", e);

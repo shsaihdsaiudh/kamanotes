@@ -1,13 +1,10 @@
-package com.kama.notes.model.entity;
+package com.kama.notes.model.dto.message;
 
 import lombok.Data;
-import java.time.LocalDateTime;
 
-/**
- * 消息实体类
- */
+
 @Data
-public class Message {
+public class MessageDTO {
     /**
      * 消息ID
      */
@@ -47,14 +44,4 @@ public class Message {
      * 是否已读
      */
     private Boolean isRead;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createdAt;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updatedAt;
-} 
+}

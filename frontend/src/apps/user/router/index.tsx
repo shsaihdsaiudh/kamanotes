@@ -23,7 +23,7 @@ import QuestionSetPage from '../pages/questionSet/QuestionSetPage.tsx'
 import QuestionPage from '../pages/question/QuestionPage.tsx'
 import UserHomePage from '../pages/userHome/UserHomePage.tsx'
 import QuestionListPage from '../pages/questionList/QuestionListPage.tsx'
-import MessagePage from '../pages/MessagePage.tsx'
+import MessagePage from '@/apps/user/pages/message/MessagePage.tsx'
 
 export const UserRouteConfig = (
   <Route path={HOME} element={<UserApp />}>

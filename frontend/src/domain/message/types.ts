@@ -1,54 +1,33 @@
-/**
- * 消息发送者信息
- */
-export interface MessageSender {
-  userId: number
-  username: string
-  avatarUrl: string
+import { QuestionSummary } from '@/domain/question'
+
+enum MessageType {
+  LIKE = 1,
+  COMMENT = 2,
+  SYSTEM = 3,
 }
 
-/**
- * 消息类型
- */
-export type MessageType = 'COMMENT' | 'LIKE' | 'SYSTEM'
+enum TargetType {
+  NOTE = 1,
+  COMMENT = 2,
+}
 
-/**
- * 消息数据
- */
 export interface Message {
   messageId: number
-  sender: MessageSender
+  sender: {
+    // 发送者信息
+    userId: string
+    username: string
+    avatar: string
+  }
   type: MessageType
-  targetId: number
-  content: string
+  // 如果是评论 / 点赞消息的话，通过 target 能够导航到对应的界面
+  // 如果是系统消息，target 为空
+  target?: {
+    type: TargetType
+    targetId: number
+    question: QuestionSummary
+  }
   isRead: boolean
+  content: string
   createdAt: string
-}
-
-/**
- * 消息查询参数
- */
-export interface MessageQueryParams {
-  page: number
-  pageSize: number
-  type?: MessageType
-  isRead?: boolean
-}
-
-/**
- * 消息API响应
- */
-export interface MessageResponse {
-  code: number
-  message: string
-  data: Message[]
-}
-
-/**
- * 未读消息数量响应
- */
-export interface UnreadCountResponse {
-  code: number
-  message: string
-  data: number
 }
