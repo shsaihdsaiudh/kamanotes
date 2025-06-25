@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import { RootState } from '../../../store/store.ts'
+import { RootState } from '@/store/store.ts'
 
 // 返回 Redux 中的个人信息
 // 针对于当前登录用户

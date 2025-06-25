@@ -17,16 +17,6 @@ public class CommentQueryParams {
     private Integer noteId;
 
     /**
-     * 父评论ID
-     */
-    private Integer parentId;
-
-    /**
-     * 作者ID
-     */
-    private Long authorId;
-
-    /**
      * 页码
      */
     @NotNull(message = "页码不能为空")

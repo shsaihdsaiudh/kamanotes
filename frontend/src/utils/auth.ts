@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'kama_token'
+const TOKEN_KEY = 'kamanote:userToken'
 
 /**
  * 获取token

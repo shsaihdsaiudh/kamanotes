@@ -5,7 +5,7 @@ import { Divider, Skeleton } from 'antd'
 import RankList from './components/RankList.tsx'
 import { NoteHeatMap } from '../../../../domain/note'
 import { Top3Count } from '../../../../domain/note'
-import { useApp } from '../../../../base/hooks'
+import { useApp } from '@/base/hooks'
 
 const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useState<NoteQueryParams>({
@@ -43,7 +43,7 @@ const HomePage: React.FC = () => {
               setQueryParams={setSearchParamsHandle}
               setNoteLikeStatusHandle={setNoteLikeStatusHandle}
               setNoteCollectStatusHandle={setNoteCollectStatusHandle}
-            ></NoteList>
+            />
           </Skeleton>
         </Panel>
       </div>

@@ -26,12 +26,17 @@ public class Message {
     /**
      * 消息类型
      */
-    private String type;
+    private Integer type;
 
     /**
      * 目标ID
      */
     private Integer targetId;
+
+    /**
+     * 目标类型
+     */
+    private Integer targetType;
 
     /**
      * 消息内容

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { NoteRankListItem } from '../types/serviceTypes.ts'
 import { BronzeTrophy, GoldTrophy, SliverTrophy } from '../../../base/icon'
 import { noteService } from '../service/noteService.ts'
-import { USER_HOME } from '../../../apps/user/router/config.ts'
+import { USER_HOME } from '@/apps/user/router/config.ts'
 
 const NoteRankList: React.FC = () => {
   const [rankList, setRankList] = useState<NoteRankListItem[]>([])

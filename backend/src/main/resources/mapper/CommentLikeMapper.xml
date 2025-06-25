@@ -11,11 +11,8 @@
 
     <!-- 插入评论点赞 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="commentLikeId">
-        INSERT INTO comment_like (
-            comment_id, user_id, created_at
-        ) VALUES (
-            #{commentId}, #{userId}, #{createdAt}
-        )
+        INSERT INTO comment_like (comment_id, user_id)
+        VALUES (#{commentId}, #{userId})
     </insert>
 
     <!-- 删除评论点赞 -->

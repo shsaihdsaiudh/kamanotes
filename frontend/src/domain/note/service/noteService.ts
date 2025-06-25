@@ -1,4 +1,4 @@
-import { httpClient } from '../../../request'
+import { httpClient } from '@/request'
 import { noteApiList } from '../api/noteApi.ts'
 import {
   CreateNoteParams,

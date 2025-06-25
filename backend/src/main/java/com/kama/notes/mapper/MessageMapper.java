@@ -21,6 +21,8 @@ public interface MessageMapper {
      */
     int insert(Message message);
 
+    List<Message> selectByUserId(Long userId);
+
     /**
      * 根据参数查询消息列表
      *
@@ -56,6 +58,11 @@ public interface MessageMapper {
      * @return 影响行数
      */
     int markAllAsRead(@Param("userId") Long userId);
+
+    /**
+     * 批量标记消息为已读
+     */
+    int markAsReadBatch(@Param("messageIds") List<Integer> messageIds, @Param("userId") Long userId);
 
     /**
      * 删除消息

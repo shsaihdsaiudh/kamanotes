@@ -2,10 +2,8 @@ package com.kama.notes.service;
 
 import com.kama.notes.model.base.ApiResponse;
 import com.kama.notes.model.base.EmptyVO;
-import com.kama.notes.model.base.PageVO;
-import com.kama.notes.model.dto.message.MessageQueryParams;
+import com.kama.notes.model.dto.message.MessageDTO;
 import com.kama.notes.model.vo.message.MessageVO;
-import com.kama.notes.model.vo.message.UnreadCountByType;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,23 +15,13 @@ import java.util.List;
 public interface MessageService {
     /**
      * 创建消息
-     *
-     * @param receiverId 接收者ID
-     * @param senderId 发送者ID
-     * @param type 消息类型
-     * @param targetId 目标ID
-     * @param content 消息内容
-     * @return 创建的消息ID
      */
-    ApiResponse<Integer> createMessage(Long receiverId, Long senderId, String type, Integer targetId, String content);
+    Integer createMessage(MessageDTO messageDTO);
 
     /**
      * 获取消息列表
-     *
-     * @param params 查询参数
-     * @return 消息列表，带分页信息
      */
-    ApiResponse<PageVO<MessageVO>> getMessages(MessageQueryParams params);
+    ApiResponse<List<MessageVO>> getMessages();
 
     /**
      * 标记消息为已读
@@ -42,6 +30,14 @@ public interface MessageService {
      * @return 空响应
      */
     ApiResponse<EmptyVO> markAsRead(Integer messageId);
+
+    /**
+     * 批量标记消息为已读
+     *
+     * @param messageIds 消息ID列表
+     * @return 空响应
+     */
+    ApiResponse<EmptyVO> markAsReadBatch(List<Integer> messageIds);
 
     /**
      * 标记所有消息为已读
@@ -64,11 +60,4 @@ public interface MessageService {
      * @return 未读消息数量
      */
     ApiResponse<Integer> getUnreadCount();
-
-    /**
-     * 获取各类型未读消息数量
-     *
-     * @return 各类型未读消息数量
-     */
-    ApiResponse<List<UnreadCountByType>> getUnreadCountByType();
-} 
+}
