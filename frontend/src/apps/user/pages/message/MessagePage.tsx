@@ -119,9 +119,9 @@ const MessagePage: React.FC = () => {
   const getActionText = (type: number) => {
     switch (type) {
       case MessageType.LIKE:
-        return '赞了您的笔记'
+        return '赞了你的笔记'
       case MessageType.COMMENT:
-        return '评论了您的笔记'
+        return '评论了你的笔记'
       case MessageType.SYSTEM:
         return ''
       default:
@@ -339,6 +339,7 @@ const MessagePage: React.FC = () => {
       style={{
         margin: '0 auto',
       }}
+      id="message-page"
     >
       <Panel>
         <div className="message-header mb-4">
