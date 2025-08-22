@@ -117,6 +117,11 @@
         WHERE category_id = #{categoryId}
     </delete>
 
+    <select id="findByTitle" resultType="com.kama.notes.model.entity.Question">
+        SELECT *
+        FROM question
+        WHERE title = #{title}
+    </select>
 
     <delete id="deleteById">
         DELETE

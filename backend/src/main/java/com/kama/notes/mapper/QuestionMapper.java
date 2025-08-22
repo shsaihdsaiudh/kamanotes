@@ -47,6 +47,11 @@ public interface QuestionMapper {
                                     @Param("limit") int limit);
 
     /**
+     * 根据标题查询问题
+     */
+    Question findByTitle(@Param("title") String title);
+
+    /**
      * 根据关键字搜索问题
      *
      * @param keyword 关键字，用于匹配问题标题或内容

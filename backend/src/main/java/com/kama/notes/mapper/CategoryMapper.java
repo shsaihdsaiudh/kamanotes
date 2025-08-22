@@ -81,4 +81,12 @@ public interface CategoryMapper {
      * @return 返回更新操作的影响行数，表示成功更新的分类数量
      */
     int update(Category category);
+
+    /**
+     * 根据分类名称查询分类
+     *
+     * @param categoryName 分类名称
+     * @return 返回查询到的分类对象，如果未找到则返回 null
+     */
+    Category findByName(String categoryName);
 }

@@ -141,4 +141,41 @@ public class CategoryServiceImpl implements CategoryService {
             return ApiResponseUtil.error("更新分类失败");
         }
     }
+
+    /**
+     * 根据分类名称查找分类，如果分类不存在则创建一个父分类
+     *
+     * @param categoryName 分类名称
+     * @return 返回一个Category对象，如果分类不存在则创建一个新分类
+     */
+    @Override
+    public Category findOrCreateCategory(String categoryName) {
+        Category category = categoryMapper.findByName(categoryName.trim());
+        if (category != null) return category;
+
+        try {
+            Category category2 = new Category();
+            category2.setName(categoryName.trim());
+            category2.setParentCategoryId(0);
+            categoryMapper.insert(category2);
+            return category2;
+        } catch (Exception e) {
+            throw new RuntimeException("创建分类失败");
+        }
+    }
+
+    @Override
+    public Category findOrCreateCategory(String categoryName, Integer parentCategoryId) {
+        Category category = categoryMapper.findByName(categoryName.trim());
+        if (category != null) return category;
+        try {
+            Category category2 = new Category();
+            category2.setName(categoryName.trim());
+            category2.setParentCategoryId(parentCategoryId);
+            categoryMapper.insert(category2);
+            return category2;
+        } catch (Exception e) {
+            throw new RuntimeException("创建分类失败");
+        }
+    }
 }

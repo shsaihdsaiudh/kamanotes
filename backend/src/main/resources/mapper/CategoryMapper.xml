@@ -81,4 +81,10 @@
         </set>
         WHERE category_id = #{categoryId}
     </update>
+
+    <select id="findByName" resultType="com.kama.notes.model.entity.Category">
+        SELECT *
+        FROM category
+        WHERE name = #{categoryName}
+    </select>
 </mapper>

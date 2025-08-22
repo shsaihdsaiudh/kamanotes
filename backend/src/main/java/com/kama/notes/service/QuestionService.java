@@ -2,10 +2,7 @@ package com.kama.notes.service;
 
 import com.kama.notes.model.base.ApiResponse;
 import com.kama.notes.model.base.EmptyVO;
-import com.kama.notes.model.dto.question.CreateQuestionBody;
-import com.kama.notes.model.dto.question.QuestionQueryParam;
-import com.kama.notes.model.dto.question.SearchQuestionBody;
-import com.kama.notes.model.dto.question.UpdateQuestionBody;
+import com.kama.notes.model.dto.question.*;
 import com.kama.notes.model.entity.Question;
 import com.kama.notes.model.vo.question.CreateQuestionVO;
 import com.kama.notes.model.vo.question.QuestionNoteVO;
@@ -49,6 +46,12 @@ public interface QuestionService {
      * @return 返回一个包含创建问题结果的ApiResponse对象，包括新创建问题的 ID
      */
     ApiResponse<CreateQuestionVO> createQuestion(CreateQuestionBody createQuestionBody);
+
+    /**
+     * 批量创建问题
+     * @return 批量创建问题的结果，包括新创建问题的 ID
+     */
+    ApiResponse<EmptyVO> createQuestionBatch(CreateQuestionBatchBody createQuestionBatchBody);
 
     /**
      * 更新问题信息

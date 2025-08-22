@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
+import com.kama.notes.model.dto.question.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kama.notes.model.base.ApiResponse;
 import com.kama.notes.model.base.EmptyVO;
-import com.kama.notes.model.dto.question.CreateQuestionBody;
-import com.kama.notes.model.dto.question.QuestionQueryParam;
-import com.kama.notes.model.dto.question.SearchQuestionBody;
-import com.kama.notes.model.dto.question.UpdateQuestionBody;
 import com.kama.notes.model.vo.question.CreateQuestionVO;
 import com.kama.notes.model.vo.question.QuestionNoteVO;
 import com.kama.notes.model.vo.question.QuestionUserVO;
@@ -88,6 +85,16 @@ public class QuestionController {
     @PostMapping("/admin/questions")
     public ApiResponse<CreateQuestionVO> createQuestion(@Valid @RequestBody CreateQuestionBody createQuestionBody) {
         return questionService.createQuestion(createQuestionBody);
+    }
+
+    /**
+     * 管理端批量创建问题
+     * @param createQuestionBatchBody 创建问题的请求体列表，包含问题的标题、内容等信息
+     * @return 创建结果
+     */
+    @PostMapping("/admin/questions/batch")
+    public ApiResponse<EmptyVO> createQuestions(@RequestBody CreateQuestionBatchBody createQuestionBatchBody) {
+        return questionService.createQuestionBatch(createQuestionBatchBody);
     }
 
     /**
