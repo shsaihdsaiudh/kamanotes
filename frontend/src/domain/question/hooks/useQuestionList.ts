@@ -77,6 +77,13 @@ export function useQuestionList(queryParams: QuestionQueryParams) {
     ])
   }
 
+  /**
+   * 批量创建问题
+   */
+  async function createQuestionBatch(markdown: string) {
+    await adminQuestionService.createQuestionBatchService({ markdown })
+  }
+
   return {
     loading,
     pagination,
@@ -84,5 +91,6 @@ export function useQuestionList(queryParams: QuestionQueryParams) {
     updateQuestion,
     deleteQuestion,
     createQuestion,
+    createQuestionBatch,
   }
 }

@@ -4,10 +4,13 @@ import com.vladsch.flexmark.ast.*;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.Node;
+import lombok.Getter;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class MarkdownAST {
     private final Document markdownAST;
     private final String markdownText;
@@ -85,6 +88,19 @@ public class MarkdownAST {
             text.append(getNodeText(child));
         }
         return text.toString();
+    }
+
+    // 获取 heading 的文本内容
+    public String getHeadingText(Heading headingNode) {
+        return headingNode.getText().toString().trim();
+    }
+
+    public String getListItemText(ListItem listItem) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node = listItem.getFirstChild(); node != null; node = node.getNext()) {
+            sb.append(node.getChars().toString());
+        }
+        return sb.toString().trim();
     }
 
     // 判断 Markdown 文本中是否包含图片

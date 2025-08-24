@@ -4,6 +4,7 @@ import com.kama.notes.model.base.ApiResponse;
 import com.kama.notes.model.base.EmptyVO;
 import com.kama.notes.model.dto.category.CreateCategoryBody;
 import com.kama.notes.model.dto.category.UpdateCategoryBody;
+import com.kama.notes.model.entity.Category;
 import com.kama.notes.model.vo.category.CategoryVO;
 import com.kama.notes.model.vo.category.CreateCategoryVO;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,4 +54,19 @@ public interface CategoryService {
      * @return 返回一个ApiResponse对象，包含HTTP状态码和可能的错误信息，以及更新后的CategoryVO对象
      */
     ApiResponse<EmptyVO> updateCategory(Integer categoryId, UpdateCategoryBody updateCategoryBody);
+
+    /**
+     * 根据分类名称查找分类，如果分类不存在则创建一个父分类
+     * @param categoryName 分类名称
+     * @return 返回一个Category对象，如果分类不存在则创建一个新分类
+     */
+    Category findOrCreateCategory(String categoryName);
+
+    /**
+     * 根据分类名称查找分类，如果分类不存在则创建一个父分类
+     * @param categoryName 分类名称
+     * @param parentCategoryId 父分类 ID
+     * @return 返回一个Category对象，如果分类不存在则创建一个新分类
+     */
+    Category findOrCreateCategory(String categoryName, Integer parentCategoryId);
 }

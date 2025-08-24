@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import {
   Button,
+  message,
+  Modal,
   Pagination,
   Popconfirm,
   Table,
@@ -14,6 +16,8 @@ import { useCategory } from '../../category'
 import { useQuestionList } from '../hooks/useQuestionList.ts'
 import { AddThree, DeleteOne, EditTwo } from '@icon-park/react'
 import QuestionAddDrawer from './QuestionAddDrawer.tsx'
+import TextArea from 'antd/es/input/TextArea'
+import { createQuestionBatchPlaceHolder } from '@/domain/questionList/placeholder.ts'
 
 /**
  * 管理端的问题列表
@@ -61,6 +65,7 @@ const QuestionList: React.FC = () => {
     createQuestion,
     updateQuestion,
     deleteQuestion,
+    createQuestionBatch,
   } = useQuestionList(queryParams)
 
   /**
@@ -136,6 +141,16 @@ const QuestionList: React.FC = () => {
   }
 
   /**
+   * 打开 Modal
+   */
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  /**
+   * TextArea 受控内容
+   */
+  const [textAreaValue, setTextAreaValue] = useState('')
+
+  /**
    * 表格的列定义
    */
   const columns: TableProps<QuestionEntity>['columns'] = [
@@ -165,7 +180,6 @@ const QuestionList: React.FC = () => {
       title: '操作',
       width: '15%',
       render: (_, question) => {
-        console.log(question)
         return (
           <div className="flex items-center gap-3">
             <Tooltip title={'编辑'}>
@@ -202,6 +216,8 @@ const QuestionList: React.FC = () => {
     },
   ]
 
+  const [loadingBatch, setLoadingBatch] = useState(false)
+
   return (
     <div className="rounded bg-white p-4">
       <div className="mb-3 flex justify-between">
@@ -218,17 +234,22 @@ const QuestionList: React.FC = () => {
           {/* TODO: 重置 TODO*/}
           <Button type="primary">重置</Button>
         </div>
-        <Button
-          type="primary"
-          icon={<AddThree />}
-          onClick={() => {
-            setMode('create')
-            setIsDrawerOpen(true)
-            setSelectedQuestion(undefined)
-          }}
-        >
-          创建问题
-        </Button>
+        <div className="flex gap-2">
+          <Button icon={<AddThree />} onClick={() => setIsModalOpen(true)}>
+            批量创建
+          </Button>
+          <Button
+            type="primary"
+            icon={<AddThree />}
+            onClick={() => {
+              setMode('create')
+              setIsDrawerOpen(true)
+              setSelectedQuestion(undefined)
+            }}
+          >
+            创建问题
+          </Button>
+        </div>
       </div>
 
       {/* 数据表格 */}
@@ -260,6 +281,28 @@ const QuestionList: React.FC = () => {
         createQuestion={createQuestion}
         updateQuestion={updateQuestion}
       />
+
+      <Modal
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        title={'批量创建问题'}
+        width={1000}
+        okButtonProps={{
+          loading: loadingBatch,
+        }}
+        onOk={async () => {
+          setLoadingBatch(true)
+          await createQuestionBatch(textAreaValue)
+          setIsModalOpen(false)
+          message.success('批量创建问题完成，刷新后可见')
+        }}
+      >
+        <TextArea
+          rows={20}
+          onChange={(e) => setTextAreaValue(e.target.value)}
+          placeholder={createQuestionBatchPlaceHolder}
+        />
+      </Modal>
     </div>
   )
 }
