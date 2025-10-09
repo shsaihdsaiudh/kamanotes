@@ -6,6 +6,16 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * CategoryMapper
+ *
+ * MyBatis 映射接口，负责对 Category 实体的持久化操作。
+ *
+ * 说明：
+ * - 提供增、删、改、查与批量操作方法，Mapper 方法由对应的 XML 或注解 SQL 实现；
+ * - 方法参数和返回值尽量保持简单（基本类型 / 实体 / 列表），便于 MyBatis 映射与序列化；
+ * - 需要在 Service 层处理事务、校验与业务约束，Mapper 仅负责与数据库交互。
+ */
 @Mapper
 public interface CategoryMapper {
     /**

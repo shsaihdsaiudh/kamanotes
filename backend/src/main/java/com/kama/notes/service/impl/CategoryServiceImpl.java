@@ -21,6 +21,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * CategoryServiceImpl
+ *
+ * 分类相关业务实现类。
+ *
+ * 责任：
+ * - 提供分类的查询、创建、更新与删除逻辑；
+ * - 构建前端需要的分类树结构；
+ * - 在删除涉及多表操作时依赖事务保证一致性。
+ *
+ * 注意：
+ * - 复杂的业务校验（权限、依赖检查等）应在 Service 层补充；
+ * - 对可能抛出异常的方法使用事务或在上层捕获以保证数据一致性。
+ */
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -30,6 +44,15 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private QuestionMapper QuestionMapper;
 
+    /**
+     * 构建分类树（只包含一级父分类及其直接子分类）。
+     *
+     * 实现要点：
+     * - 从数据库读取所有分类，将 parentCategoryId == 0 的作为父分类；
+     * - 子分类封装为 ChildrenCategoryVO 并加入对应父分类的 children 列表；
+     *
+     * @return 根父分类列表（每个父分类包含其子分类集合）
+     */
     public List<CategoryVO> buildCategoryTree() {
         // 获取所有分类
         List<Category> categories = categoryMapper.categoryList();
@@ -66,6 +89,17 @@ public class CategoryServiceImpl implements CategoryService {
         return ApiResponseUtil.success("获取分类列表成功", buildCategoryTree());
     }
 
+    /**
+     * 删除分类（包括其作为父分类的子分类），并删除这些分类下关联的问题。
+     *
+     * 事务说明：
+     * - 使用 @Transactional 保证删除分类与删除问题操作在同一事务中执行；
+     * - 发生异常时抛出 RuntimeException 以触发回滚。
+     *
+     * @param categoryId 要删除的分类 ID
+     * @return 操作结果的 ApiResponse（成功或错误信息）
+     * @throws RuntimeException 删除失败时抛出以触发事务回滚
+     */
     @Override
     @Transactional
     public ApiResponse<EmptyVO> deleteCategory(Integer categoryId) throws RuntimeException {
@@ -99,6 +133,16 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * 创建分类。
+     *
+     * 校验要点：
+     * - 如果 parentCategoryId 非 0，验证父分类是否存在；
+     * - 插入失败时返回错误响应。
+     *
+     * @param categoryBody 创建分类请求体
+     * @return 包含新创建分类 ID 的 ApiResponse
+     */
     @Override
     public ApiResponse<CreateCategoryVO> createCategory(CreateCategoryBody categoryBody) {
 
@@ -123,6 +167,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * 更新分类名称。
+     *
+     * @param categoryId 分类 ID
+     * @param categoryBody 更新请求体（包含新的 name）
+     * @return 操作结果的 ApiResponse
+     */
     @Override
     public ApiResponse<EmptyVO> updateCategory(Integer categoryId, UpdateCategoryBody categoryBody) {
 
@@ -143,10 +194,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * 根据分类名称查找分类，如果分类不存在则创建一个父分类
+     * 根据分类名称查找分类，若不存在则创建一个父分类（parentCategoryId = 0）。
      *
      * @param categoryName 分类名称
-     * @return 返回一个Category对象，如果分类不存在则创建一个新分类
+     * @return 已存在或新创建的 Category 实例
+     * @throws RuntimeException 创建失败时抛出异常
      */
     @Override
     public Category findOrCreateCategory(String categoryName) {
@@ -164,6 +216,14 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * 根据分类名称查找分类，若不存在则创建并设置指定的父分类。
+     *
+     * @param categoryName 分类名称
+     * @param parentCategoryId 父分类 ID
+     * @return 已存在或新创建的 Category 实例
+     * @throws RuntimeException 创建失败时抛出异常
+     */
     @Override
     public Category findOrCreateCategory(String categoryName, Integer parentCategoryId) {
         Category category = categoryMapper.findByName(categoryName.trim());

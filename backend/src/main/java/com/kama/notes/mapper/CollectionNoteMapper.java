@@ -7,6 +7,20 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * CollectionNoteMapper
+ *
+ * 收藏夹与笔记关联表（collection_note） 的 MyBatis 映射接口。
+ *
+ * 职责：
+ * - 提供对收藏夹与笔记关系的查询、插入与删除操作；
+ * - 接口方法应尽可能保持单一职责，复杂的业务逻辑（事务、权限校验、级联删除策略）应在 Service 层实现；
+ *
+ * 使用与注意事项：
+ * - 对于批量操作（如批量删除/插入），请在 Service 层控制事务并避免在单条方法中执行大量循环插入，必要时使用批量 SQL；
+ * - 查询返回的集合类型（List / Set）应与 Mapper XML 中的 resultType/collection 配置一致；
+ * - 方法参数使用 @Param 明确命名，便于在 XML 中引用并提高可读性。
+ */
 @Mapper
 public interface CollectionNoteMapper {
     /**

@@ -41,10 +41,13 @@ public class UserController {
 
     /**
      * 用户注册接口
-     * 处理用户注册请求，验证请求体并调用 userService 进行注册
      *
-     * @param request 用户注册请求对象，包含用户注册所需信息
-     * @return 返回注册结果，包括用户信息等
+     * 说明：
+     * - 校验入参后调用 service 完成注册逻辑（含密码加密、唯一性校验等）。
+     * - 返回泛型 ApiResponse<RegisterVO>，包含注册成功后的关键信息（如用户 id 等）。
+     *
+     * @param request 包含注册所需字段的 DTO，带有 javax.validation 校验
+     * @return ApiResponse 包含 RegisterVO（注册结果）
      */
     @PostMapping("/users")
     public ApiResponse<RegisterVO> register(
@@ -56,10 +59,12 @@ public class UserController {
 
     /**
      * 用户登录接口
-     * 处理用户登录请求，验证请求体并调用userService进行登录
      *
-     * @param request 用户登录请求对象，包含用户登录所需信息
-     * @return 返回登录结果，包括用户信息和认证令牌等
+     * 说明：
+     * - 验证登录请求并调用 service 进行认证，通常返回用户信息和认证令牌（如 JWT）。
+     *
+     * @param request 登录请求体，包含账号/密码或邮箱/验证码等
+     * @return ApiResponse 包含 LoginUserVO（登录用户信息与凭证）
      */
     @PostMapping("/users/login")
     public ApiResponse<LoginUserVO> login(
@@ -70,10 +75,12 @@ public class UserController {
     }
 
     /**
-     * 自动登录接口
-     * 当用户已登录并请求自动登录时，调用userService获取当前用户信息
+     * 自动登录 / 会话续期接口
      *
-     * @return 返回当前用户信息
+     * 说明：
+     * - 在前端持有有效凭证时可调用以获取当前登录用户信息（通常用于页面刷新后的身份恢复）。
+     *
+     * @return ApiResponse 包含当前登录的 LoginUserVO
      */
     @PostMapping("/users/whoami")
     public ApiResponse<LoginUserVO> whoami() {
@@ -81,11 +88,13 @@ public class UserController {
     }
 
     /**
-     * 查询用户信息接口
-     * 根据用户ID查询用户信息，验证ID格式并调用userService获取用户详情
+     * 获取指定用户信息
      *
-     * @param userId 用户ID，需为数字格式
-     * @return 返回指定用户的详细信息
+     * 说明：
+     * - 根据路径中的 userId 查询用户详情，参数通过 @Pattern 做基本格式校验（数字字符串）。
+     *
+     * @param userId 要查询的用户 ID（数字字符串）
+     * @return ApiResponse 包含 UserVO（用户详细信息）
      */
     @GetMapping("/users/{userId}")
     public ApiResponse<UserVO> getUserInfo(
@@ -96,11 +105,14 @@ public class UserController {
     }
 
     /**
-     * 更新用户信息接口
-     * 处理更新用户信息请求，验证请求体并调用userService更新用户详情
+     * 更新当前用户信息（部分更新）
      *
-     * @param request 更新用户请求对象，包含需要更新的用户信息
-     * @return 返回更新后的用户信息
+     * 说明：
+     * - 接收 UpdateUserRequest，进行字段校验后委托 service 更新用户资料（如昵称、签名等）。
+     * - 返回更新后的登录用户信息（LoginUserVO）。
+     *
+     * @param request 更新用户的 DTO，带有 @Valid 校验
+     * @return ApiResponse 包含更新后的 LoginUserVO
      */
     @PatchMapping("/users/me")
     public ApiResponse<LoginUserVO> updateUserInfo(
@@ -111,10 +123,14 @@ public class UserController {
     }
 
     /**
-     * 上传用户头像接口
+     * 上传用户头像
      *
-     * @param file 头像文件
-     * @return 返回上传结果，包括头像URL等
+     * 说明：
+     * - 接收 MultipartFile，委托 service 处理文件存储并返回头像信息（如访问 URL）。
+     * - 建议在 service 层做文件类型与大小校验、存储路径管理与 CDN/对象存储接入。
+     *
+     * @param file 头像文件（Multipart/form-data）
+     * @return ApiResponse 包含 AvatarVO（头像元信息）
      */
     @PostMapping("/users/avatar")
     public ApiResponse<AvatarVO> uploadAvatar(
@@ -123,11 +139,14 @@ public class UserController {
     }
 
     /**
-     * 管理员获取用户信息列表的接口
-     * 该接口允许管理员查询系统的用户列表，支持分页和条件查询
+     * 管理端：获取用户列表
      *
-     * @param queryParam 查询参数对象，封装了用户查询条件和分页信息，通过验证确保参数有效性
-     * @return 返回一个包含用户列表的ApiResponse对象，响应中包含用户数据
+     * 说明：
+     * - 该接口用于后台管理页面，接收 UserQueryParam（分页/筛选）并返回用户实体列表。
+     * - 请在安全层确保仅管理员可访问此接口（由拦截器或安全配置控制）。
+     *
+     * @param queryParam 查询参数，包含分页与筛选条件，使用 @Valid 校验
+     * @return ApiResponse 包含用户实体列表
      */
     @GetMapping("/admin/users")
     public ApiResponse<List<User>> adminGetUser(

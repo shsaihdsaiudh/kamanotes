@@ -1,29 +1,30 @@
+# 应用与基础配置
 spring:
   application:
-    name: kama-notes
+    name: kama-notes # 应用名
   servlet:
     multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
+      max-file-size: 50MB      # 上传单文件最大值（用于 multipart 限制）
+      max-request-size: 50MB   # 上传总请求大小限制
   profiles:
-    active: dev
+    active: dev               # 当前激活的 Spring 配置文件（开发环境）
   redis:
-    host: localhost
-    port: 6379
-    database: 0
-    timeout: 2000
+    host: localhost           # Redis 主机
+    port: 6379                # Redis 端口
+    database: 0               # Redis 数据库索引
+    timeout: 2000             # 连接超时 ms
     jedis:
       pool:
         enabled: on
-        max-active: 8
+        max-active: 8        # 连接池最大活动连接数
         max-idle: 8
         min-idle: 0
-        max-wait: 2000
+        max-wait: 2000      # 获取连接最大等待 ms
   mail:
-    host: smtp.qq.com
-    port: 465
-    username: your@qq.com
-    password: password
+    host: smtp.qq.com         # SMTP 主机（发信服务）
+    port: 465                 # SMTP 端口（SSL/TLS）
+    username: your@qq.com     # 发信账号（请不要在版本库中提交真实密码）
+    password: password        # 发信密码或授权码（请使用安全的密钥管理）
     properties:
       mail:
         smtp:
@@ -36,24 +37,27 @@ spring:
     protocol: smtps
     default-encoding: UTF-8
 
+# MyBatis 配置（Mapper 文件及别名、驼峰映射等）
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
-    map-underscore-to-camel-case: true
+    map-underscore-to-camel-case: true   # 下划线转驼峰
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   type-aliases-package: com.kama.notes.entity.custom
   type-handlers-package: com.kama.notes.typehandler
 
+# JWT 配置：密钥与过期（注意：生产环境请使用更强的 secret 并保存在安全位置）
 jwt:
-  secret: abc123
-  expiration: 2592000
+  secret: abc123           # 不要在生产环境中使用明文 secret，建议从环境变量或密钥管理读取
+  expiration: 2592000      # 过期时间（秒），示例为 30 天
 
 server:
-  port: 8080
+  port: 8080               # 应用端口
 
-# 自定义邮件配置
+# 自定义邮件验证码相关配置
 mail:
   verify-code:
-    expire-minutes: 15  # 验证码过期时间 15 min
-    limit-expire-seconds: 60  # 发送过一次验证码后，在 60s 内不能再发送验证码，用于限流
-    template-path: "templates/mail/verify-code.html"
+    expire-minutes: 15            # 验证码有效期（分钟）
+    limit-expire-seconds: 60      # 发送频率限制：发送一次后在此秒数内禁止重复发送（防刷）
+    template-path: "templates/mail/verify-code.html" # 邮件模板路径（Classpath 下）
+# ...existing code...

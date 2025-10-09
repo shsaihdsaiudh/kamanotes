@@ -24,6 +24,17 @@ import com.kama.notes.model.vo.question.QuestionUserVO;
 import com.kama.notes.model.vo.question.QuestionVO;
 import com.kama.notes.service.QuestionService;
 
+/**
+ * QuestionController
+ *
+ * 问答模块的 REST 控制器，包含用户端与管理端关于问题的查询、搜索、创建、更新与删除接口。
+ *
+ * 设计要点：
+ * - 用户端接口（如 /questions）返回用户视图对象，管理端接口（如 /admin/questions）返回完整管理视图；
+ * - 入参使用 javax.validation 做基础校验（@Valid、@Min）；
+ * - 控制器只负责参数校验与路由分发，所有业务逻辑应在 QuestionService 中实现（含权限与事务）；
+ * - 返回类型统一使用 ApiResponse<T>，便于前端统一处理状态与消息；无数据时可使用 EmptyVO。
+ */
 @RestController
 @RequestMapping("/api")
 public class QuestionController {
@@ -32,10 +43,14 @@ public class QuestionController {
     private QuestionService questionService;
 
     /**
-     * 用户端获取问题列表
+     * 用户端：获取问题列表
      *
-     * @param queryParams 查询参数，用于过滤问题列表（如关键词、分类等）
-     * @return 包含用户可见问题的视图对象列表的响应
+     * 行为：
+     * - 返回当前可见的问题列表（QuestionUserVO），支持基于 QueryParam 的筛选与分页；
+     * - 参数使用 @Valid 验证基本约束。
+     *
+     * @param queryParams 查询参数（支持关键词、分类、分页等）
+     * @return ApiResponse 包含 List<QuestionUserVO>
      */
     @GetMapping("/questions")
     public ApiResponse<List<QuestionUserVO>> userGetQuestions(@Valid QuestionQueryParam queryParams) {
@@ -43,10 +58,14 @@ public class QuestionController {
     }
 
     /**
-     * 用户端搜索问题
+     * 用户端：搜索问题
      *
-     * @param body 包含搜索关键词的请求体
-     * @return 包含搜索结果的视图对象列表的响应
+     * 行为：
+     * - 根据请求体中的搜索条件执行搜索，并返回匹配的 QuestionVO 列表；
+     * - 使用 @Valid 校验请求体格式。
+     *
+     * @param body 搜索请求体，包含关键词等搜索条件
+     * @return ApiResponse 包含搜索结果 List<QuestionVO>
      */
     @PostMapping("/questions/search")
     public ApiResponse<List<QuestionVO>> searchQuestions(@Valid @RequestBody SearchQuestionBody body) {
@@ -54,10 +73,14 @@ public class QuestionController {
     }
 
     /**
-     * 用户端获取单个问题详情
+     * 用户端：获取单个问题详情（含关联笔记）
      *
-     * @param questionId 问题ID，必须为正整数
-     * @return 包含问题详情及关联笔记的视图对象的响应
+     * 行为：
+     * - 根据 questionId 返回问题详情及其关联的笔记信息（QuestionNoteVO）；
+     * - 使用 @Min 校验路径参数为正整数。
+     *
+     * @param questionId 问题 ID（正整数）
+     * @return ApiResponse 包含 QuestionNoteVO
      */
     @GetMapping("/questions/{questionId}")
     public ApiResponse<QuestionNoteVO> userGetQuestion(@Min(value = 1, message = "questionId 必须为正整数")
@@ -66,10 +89,14 @@ public class QuestionController {
     }
 
     /**
-     * 管理端获取问题列表
+     * 管理端：获取问题列表
      *
-     * @param queryParams 查询参数，用于过滤问题列表（如关键词、时间范围等）
-     * @return 包含所有问题的视图对象列表的响应
+     * 行为：
+     * - 为管理后台返回问题列表（QuestionVO），支持更丰富的筛选与分页参数；
+     * - 使用 @Valid 校验查询参数。
+     *
+     * @param queryParams 管理端查询参数
+     * @return ApiResponse 包含 List<QuestionVO>
      */
     @GetMapping("/admin/questions")
     public ApiResponse<List<QuestionVO>> getQuestions(@Valid QuestionQueryParam queryParams) {
@@ -77,10 +104,14 @@ public class QuestionController {
     }
 
     /**
-     * 管理端创建新问题
+     * 管理端：创建新问题
      *
-     * @param createQuestionBody 创建问题的请求体，包含问题的标题、内容等信息
-     * @return 包含新创建问题视图对象的响应
+     * 行为：
+     * - 接收 CreateQuestionBody 并创建问题，返回创建后的视图对象（含 id 等）。
+     * - 使用 @Valid 校验请求体字段。
+     *
+     * @param createQuestionBody 创建问题所需字段
+     * @return ApiResponse 包含 CreateQuestionVO
      */
     @PostMapping("/admin/questions")
     public ApiResponse<CreateQuestionVO> createQuestion(@Valid @RequestBody CreateQuestionBody createQuestionBody) {
@@ -88,9 +119,13 @@ public class QuestionController {
     }
 
     /**
-     * 管理端批量创建问题
-     * @param createQuestionBatchBody 创建问题的请求体列表，包含问题的标题、内容等信息
-     * @return 创建结果
+     * 管理端：批量创建问题
+     *
+     * 行为：
+     * - 接收批量创建请求，Service 层负责批量插入、去重与事务控制。
+     *
+     * @param createQuestionBatchBody 批量创建请求体
+     * @return ApiResponse<EmptyVO> 表示批量创建结果
      */
     @PostMapping("/admin/questions/batch")
     public ApiResponse<EmptyVO> createQuestions(@RequestBody CreateQuestionBatchBody createQuestionBatchBody) {
@@ -98,11 +133,15 @@ public class QuestionController {
     }
 
     /**
-     * 管理端更新问题
+     * 管理端：更新问题
      *
-     * @param questionId         问题ID，必须为正整数
-     * @param updateQuestionBody 更新问题的请求体，包含要更新的字段和值
-     * @return 空视图对象的响应，表示更新操作成功
+     * 行为：
+     * - 对指定 questionId 执行部分更新，使用 UpdateQuestionBody 指定要修改的字段；
+     * - 使用 @Min 校验路径参数并使用 @Valid 校验请求体。
+     *
+     * @param questionId 问题 ID（正整数）
+     * @param updateQuestionBody 更新内容
+     * @return ApiResponse<EmptyVO> 表示更新结果
      */
     @PatchMapping("/admin/questions/{questionId}")
     public ApiResponse<EmptyVO> updateQuestion(@Min(value = 1, message = "questionId 必须为正整数")
@@ -112,10 +151,13 @@ public class QuestionController {
     }
 
     /**
-     * 管理端删除问题
+     * 管理端：删除问题
      *
-     * @param questionId 问题ID，必须为正整数
-     * @return 空视图对象的响应，表示删除操作成功
+     * 行为：
+     * - 根据 questionId 删除问题，Service 层负责权限校验与级联清理（如关联笔记、评论等）。
+     *
+     * @param questionId 问题 ID（正整数）
+     * @return ApiResponse<EmptyVO> 表示删除结果
      */
     @DeleteMapping("/admin/questions/{questionId}")
     public ApiResponse<EmptyVO> deleteQuestion(@Min(value = 1, message = "questionId 必须为正整数")

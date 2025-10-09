@@ -31,22 +31,39 @@ import com.kama.notes.service.NoteService;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 笔记控制器
+ * NoteController
+ *
+ * 笔记相关的 REST 控制器，负责笔记的查询、创建、更新、删除以及统计与导出等接口。
+ *
+ * 设计要点：
+ * - 请求/返回统一使用 ApiResponse<T>，便于前端统一处理状态与消息；
+ * - 入参使用 javax.validation 进行基础校验（@Valid、@Min 等）；
+ * - 控制器仅负责路由与参数校验，业务逻辑与事务应在 NoteService 层实现；
+ * - 建议对需要登录/权限的接口配合拦截器或 @NeedLogin 注解使用。
+ *
+ * 路径前缀：/api
  */
 @Log4j2
 @RestController
 @RequestMapping("/api")
 public class NoteController {
 
-    // 自动注入 NoteService 实例，用于处理笔记相关的业务逻辑
+    // 注入 NoteService 以委托业务处理
     @Autowired
     private NoteService noteService;
 
     /**
      * 查询笔记列表
      *
-     * @param params 查询参数对象，包含筛选条件
-     * @return 返回一个包含笔记列表的 ApiResponse 对象
+     * 行为：
+     * - 根据 NoteQueryParams 提供的筛选与分页参数返回笔记列表；
+     * - 参数使用 @Valid 校验，Service 层负责更复杂的校验与权限判断。
+     *
+     * 返回：
+     * - ApiResponse.data 为 List<NoteVO>（可能为空列表）。
+     *
+     * @param params 查询参数（支持分页、关键词、分类等）
+     * @return ApiResponse 包含笔记视图对象列表
      */
     @GetMapping("/notes")
     public ApiResponse<List<NoteVO>> getNotes(
@@ -57,8 +74,15 @@ public class NoteController {
     /**
      * 发布笔记
      *
-     * @param request 创建笔记的请求对象，包含笔记的内容等信息
-     * @return 返回一个包含新创建笔记信息的 ApiResponse 对象
+     * 行为：
+     * - 接收 CreateNoteRequest 并在 Service 层创建笔记记录；
+     * - Service 层应处理权限、内容校验、富文本/Markdown 处理与持久化。
+     *
+     * 返回：
+     * - ApiResponse.data 包含 CreateNoteVO（新建笔记的基本信息，如 id）。
+     *
+     * @param request 创建笔记请求体（必需字段由 DTO 定义）
+     * @return ApiResponse 包含新建笔记信息
      */
     @PostMapping("/notes")
     public ApiResponse<CreateNoteVO> createNote(
@@ -67,11 +91,16 @@ public class NoteController {
     }
 
     /**
-     * 更新笔记
+     * 更新笔记（部分更新）
      *
-     * @param noteId  笔记的唯一标识符，用于定位要更新的笔记
-     * @param request 更新笔记的请求对象，包含需要修改的信息
-     * @return 返回一个包含更新后笔记信息的 ApiResponse 对象
+     * 行为：
+     * - 使用 noteId 定位笔记并应用 UpdateNoteRequest 中的变更；
+     * - 使用 @Min 校验 noteId 必须为正整数；
+     * - Service 层需处理并发、权限与存在性检查。
+     *
+     * @param noteId  要更新的笔记 ID（正整数）
+     * @param request 更新字段（部分更新）
+     * @return ApiResponse<EmptyVO> 表示操作结果
      */
     @PatchMapping("/notes/{noteId}")
     public ApiResponse<EmptyVO> updateNote(
@@ -83,8 +112,12 @@ public class NoteController {
     /**
      * 删除笔记
      *
-     * @param noteId 笔记的唯一标识符，用于定位要删除的笔记
-     * @return 返回一个包含删除结果信息的 ApiResponse 对象
+     * 行为：
+     * - 根据 noteId 删除笔记，具体级联（如附件、评论、收藏关系）由 Service 层处理；
+     * - 使用 @Min 校验路径参数。
+     *
+     * @param noteId 要删除的笔记 ID（正整数）
+     * @return ApiResponse<EmptyVO> 表示删除结果
      */
     @DeleteMapping("/notes/{noteId}")
     public ApiResponse<EmptyVO> deleteNote(
@@ -94,8 +127,13 @@ public class NoteController {
     }
 
     /**
-     * 下载笔记
-     * @return
+     * 导出/下载笔记
+     *
+     * 行为说明：
+     * - 返回用于下载的对象（DownloadNoteVO），具体格式（zip、md、html）由 Service 决定；
+     * - 建议对大文件导出使用异步处理或流式响应以避免阻塞。
+     *
+     * @return ApiResponse 包含下载信息（如下载链接或文件元信息）
      */
     @GetMapping("/notes/download")
     public ApiResponse<DownloadNoteVO> downloadNote() {
@@ -103,7 +141,13 @@ public class NoteController {
     }
 
     /**
-     * 提交笔记排行榜
+     * 获取笔记排行榜
+     *
+     * 行为：
+     * - 返回用于展示的排行列表（NoteRankListItem），如按浏览/点赞/收藏等维度排序；
+     * - 排行数据的计算可由定时任务或实时聚合实现，Service 层负责具体策略。
+     *
+     * @return ApiResponse 包含排行列表
      */
     @GetMapping("/notes/ranklist")
     public ApiResponse<List<NoteRankListItem>> submitNoteRank() {
@@ -111,7 +155,13 @@ public class NoteController {
     }
 
     /**
-     * 用户提交热力图
+     * 获取笔记热力图数据
+     *
+     * 行为：
+     * - 返回用户行为或笔记分布的热力图数据（NoteHeatMapItem 列表），供前端可视化使用；
+     * - 数据计算应关注性能与分页/聚合策略。
+     *
+     * @return ApiResponse 包含热力图数据列表
      */
     @GetMapping("/notes/heatmap")
     public ApiResponse<List<NoteHeatMapItem>> submitNoteHeatMap() {
@@ -119,7 +169,13 @@ public class NoteController {
     }
 
     /**
-     * 用户提交 top3 count
+     * 获取 Top3 统计数据
+     *
+     * 行为：
+     * - 返回某些维度（如用户行为、笔记类型）的 top3 汇总计数（Top3Count）；
+     * - 用于首页或统计面板展示摘要信息。
+     *
+     * @return ApiResponse 包含 Top3Count 汇总数据
      */
     @GetMapping("/notes/top3count")
     public ApiResponse<Top3Count> submitNoteTop3Count() {

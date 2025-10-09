@@ -37,7 +37,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 评论服务实现类
+ * CommentServiceImpl
+ *
+ * 评论服务实现类，负责评论的增删改查与点赞/取消点赞等业务逻辑。
+ *
+ * 主要职责：
+ * - 创建、更新、删除评论并维护相关计数（笔记评论数、父评论回复数等）；
+ * - 点赞/取消点赞操作并记录用户点赞关系；
+ * - 获取指定笔记的评论列表（支持分页），将实体组装成 CommentVO 返回给前端；
+ * - 在适当时机发送通知（MessageService）。
+ *
+ * 事务与安全：
+ * - 写操作（创建、更新、删除、点赞/取消点赞）使用 @Transactional 以保证数据一致性；
+ * - 需要登录的操作标注 @NeedLogin，依赖 RequestScopeData 提供当前请求用户信息。
+ *
+ * 错误处理：
+ * - 方法内部对常见错误返回 ApiResponse 带有合适的 HTTP 状态码与错误信息，并记录日志。
  */
 @Slf4j
 @Service
@@ -50,6 +65,20 @@ public class CommentServiceImpl implements CommentService {
     private final MessageService messageService;
     private final RequestScopeData requestScopeData;
 
+    /**
+     * 创建评论
+     *
+     * 行为：
+     * - 校验笔记是否存在，构造 Comment 并插入；
+     * - 增加笔记的评论计数，若为回复则增加父评论的回复计数；
+     * - 发送评论通知给笔记作者（通过 MessageService）。
+     *
+     * 权限与事务：
+     * - 需要登录；方法在事务中执行，出现异常会回滚。
+     *
+     * @param request 创建请求体，包含 noteId、content、parentId 等
+     * @return 成功返回新创建的 commentId，否则返回错误信息
+     */
     @Override
     @NeedLogin
     @Transactional
@@ -108,6 +137,16 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    /**
+     * 更新评论内容
+     *
+     * 权限校验：
+     * - 仅评论作者可更新。
+     *
+     * @param commentId 评论 ID
+     * @param request 更新请求，包含新的 content
+     * @return 操作结果（空数据的成功/错误响应）
+     */
     @Override
     @NeedLogin
     @Transactional
@@ -137,6 +176,15 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    /**
+     * 删除评论
+     *
+     * 权限校验：
+     * - 仅评论作者可删除（当前实现）。
+     *
+     * @param commentId 评论 ID
+     * @return 操作结果
+     */
     @Override
     @NeedLogin
     @Transactional
@@ -164,6 +212,17 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    /**
+     * 获取评论列表（按评论树结构返回，支持对一级评论的分页）
+     *
+     * 实现要点：
+     * - 一次性拉取当前 note 的所有评论（适用于评论量适中的场景），在内存中构建树并分页一级评论；
+     * - 批量查询作者信息与当前用户的点赞记录以减少 DB 调用；
+     * - 返回 CommentVO 列表及 Pagination 分页信息。
+     *
+     * @param params 查询参数（包含 noteId、page、pageSize 等）
+     * @return 评论 VO 列表或错误响应
+     */
     @Override
     public ApiResponse<List<CommentVO>> getComments(CommentQueryParams params) {
         try {
@@ -234,7 +293,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * 把 Comment 递归转换成 CommentVO
+     * 将 Comment 递归转换为 CommentVO，并填充作者信息、当前用户动作及子评论列表
+     *
+     * @param c 当前 Comment 实体
+     * @param repliesMap parentId -> children 列表映射
+     * @param authorMap authorId -> User 映射
+     * @param likedSet 当前用户已点赞的评论 ID 集合
+     * @return 组装好的 CommentVO
      */
     private CommentVO toVO(Comment c,
                            Map<Integer, List<Comment>> repliesMap,
@@ -282,6 +347,16 @@ public class CommentServiceImpl implements CommentService {
         return vo;
     }
 
+    /**
+     * 给评论点赞
+     *
+     * 行为：
+     * - 校验评论存在，增加评论的 likeCount，并插入 CommentLike 记录；
+     * - 发送点赞通知给评论作者。
+     *
+     * @param commentId 评论 ID
+     * @return 操作结果
+     */
     @Override
     @NeedLogin
     @Transactional
@@ -324,6 +399,15 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    /**
+     * 取消评论点赞
+     *
+     * 行为：
+     * - 校验评论存在，减少评论 likeCount，并删除对应的 CommentLike 记录。
+     *
+     * @param commentId 评论 ID
+     * @return 操作结果
+     */
     @Override
     @NeedLogin
     @Transactional

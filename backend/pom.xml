@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- 父 POM：使用 Spring Boot 的依赖管理，简化版本控制 -->
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -8,16 +11,23 @@
         <version>2.7.18</version>
         <relativePath/>
     </parent>
+
+    <!-- 项目基本信息 -->
     <groupId>com.kama</groupId>
     <artifactId>notes</artifactId>
     <version>0.0.1</version>
     <name>notes-tech</name>
     <description>kamaNotes</description>
     <packaging>jar</packaging>
+
+    <!-- 编译目标 Java 版本 -->
     <properties>
         <java.version>17</java.version>
     </properties>
+
+    <!-- 依赖清单：按功能分组并附带必要注释 -->
     <dependencies>
+        <!-- Spring Web（排除默认 logging，改用 log4j2）-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -28,54 +38,76 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- Spring Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+
+        <!-- MyBatis Starter -->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.2.0</version>
         </dependency>
+
+        <!-- MySQL 驱动 -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
+
+        <!-- JWT（轻量版 jjwt） -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>0.9.1</version>
         </dependency>
+
+        <!-- Lombok（仅编译时使用） -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- 开发热部署工具（仅运行时） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+
+        <!-- 测试 Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- AOP -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
+
+        <!-- Jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+
+        <!-- 旧版 junit（若使用 JUnit5 建议替换） -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Bean Validation API 与实现 -->
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
@@ -86,11 +118,15 @@
             <artifactId>hibernate-validator</artifactId>
             <version>6.2.4.Final</version>
         </dependency>
+
+        <!-- Hutool 工具库 -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
             <version>5.8.25</version>
         </dependency>
+
+        <!-- JAXB（当使用 XML 或某些库时需要） -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
@@ -101,38 +137,45 @@
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.2</version>
         </dependency>
+
+        <!-- Markdown 解析（flexmark） -->
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-all</artifactId>
             <version>0.64.8</version>
         </dependency>
-        <!-- 排除 logback 改用 log4j2 -->
+
+        <!-- 使用 log4j2 代替默认 logback -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
-        <!-- redis -->
+        <!-- Redis 支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+
+        <!-- WebSocket 支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
-        <!-- 邮件发送依赖 -->
+
+        <!-- 邮件发送支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
-        <!-- 模板引擎 -->
+
+        <!-- 模板引擎（Thymeleaf） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- Java Mail API -->
+        <!-- Java Mail API 与实现 -->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
@@ -144,19 +187,22 @@
             <version>1.6.2</version>
         </dependency>
 
-        <!-- 添加 jieba 分词依赖 -->
+        <!-- 中文分词（jieba）-->
         <dependency>
             <groupId>com.huaban</groupId>
             <artifactId>jieba-analysis</artifactId>
             <version>1.0.2</version>
         </dependency>
     </dependencies>
+
+    <!-- 构建配置：Spring Boot Maven 插件 -->
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- 排除 lombok 打包 -->
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -167,6 +213,8 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- 使用阿里云公共仓库加速依赖下载（可按需移除或替换为私服） -->
     <repositories>
         <repository>
             <id>aliyun</id>

@@ -6,6 +6,16 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * CollectionMapper
+ *
+ * MyBatis 映射接口，负责收藏夹（Collection）相关的数据库访问操作。
+ *
+ * 说明：
+ * - Mapper 方法由对应的 XML 或注解 SQL 提供实现；
+ * - 接口仅负责与数据库交互，事务与业务逻辑应在 Service 层处理；
+ * - 方法参数使用 @Param 明确映射到 SQL 中的命名参数，便于编写对应的 Mapper XML。
+ */
 @Mapper
 public interface CollectionMapper {
     /**
